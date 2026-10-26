@@ -1,155 +1,154 @@
 ---
 title: "Thread, Matter and IPv6 Mesh Networking"
-subtitle: Self-healing low-power wireless mesh networks and interoperable smart-building application layers
-byline: Wireless Mesh Networking & Connected Home Architecture Explainer
+subtitle: Self-healing low-power mesh networks, and one application layer for smart buildings
+byline: IoT connectivity
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-020
-version: "1.0"
 colours:
   accent: "#0d9488"
   secondary: "#0f766e"
 footer:
-  left: Thread, Matter & 6LoWPAN Explainer
-  centre: Wireless Mesh Reference
-  right: IEEE 802.15.4, 6LoWPAN, Thread & Matter Guide
+  left: Thread and Matter
+  centre: IoT Engineering Reference
   qr: https://csa-iot.org/all-solutions/matter/
-  qr-label: Matter & Thread Specs
+  qr-label: Matter, from the CSA
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 250 kbps | Raw physical data rate of `IEEE 802.15.4` in `2.4 GHz` | low-power mesh | good |
-| 127 bytes | Maximum physical frame size requiring header compression | `6LoWPAN` layer | good |
-| 0 single points | Any mains-powered Thread Router or Border Router takes over | self-healing | good |
-| 1 data model | Matter unifies Thread, Wi-Fi and Ethernet under one IPv6 app layer | vendor-neutral | good |
+| Value | Label |
+|---|---|
+| 250 kbps | The IEEE 802.15.4 radio under Thread |
+| 127 bytes | Its largest frame: why headers must shrink |
+| No single point | Of failure: any router can take over |
+| 1 data model | Matter, over Thread, Wi-Fi and Ethernet alike |
 
 ## Introduction {.abstract}
 
-Traditional low-power mesh networks (`Zigbee`, `Z-Wave`) use non-IP layers that require protocol-translating hubs to talk to local phones or cloud servers. **IPv6 over Low-Power Wireless Personal Area Networks (`6LoWPAN`)** and **Thread** solve this by compressing standard **Internet Protocol Version 6 (IPv6)** packets to fit inside 127-byte `IEEE 802.15.4` radio frames. Built on this IPv6 foundation, **Matter** provides one encrypted application layer and device data model. It runs identically over **Thread**, **Wi-Fi** and **Ethernet**.
+Older meshes such as Zigbee and Z-Wave are not IP, so a hub must translate before a phone or the cloud can talk to them. **6LoWPAN** and **Thread** compress real **IPv6** packets into 127-byte 802.15.4 frames, so a mesh is just another IP network. **Matter** puts one encrypted application layer and data model on top, the same over Thread, Wi-Fi and Ethernet.
 
-## 1. The converged IPv6 protocol stack {.wide}
+## 1. The stack
 
-Notice how **Matter** uses standard IPv6, **User Datagram Protocol (UDP)** and **Transmission Control Protocol (TCP)** across every physical link layer:
-
-```figure
-@segments
-title: Top Layer — Unified Matter Application Layer (Clusters, Attributes, Commands, Events & Fabrics)
-10 | Matter Application Data Model (TLV Binary Encoding) + CASE / PASE Elliptic-Curve Security | Identical across all radios | teal
-+++
-@segments
-title: Transport & Network Layer — End-to-End IPv6 Addressing (No protocol translation hubs!)
-5 | UDP (Message Framing + MRP Reliable Retry) or TCP | Standard Transport | blue
-5 | IPv6 Routing + mDNS / DNS-SD Local Discovery | Native IPv6 | navy
-+++
-@segments
-title: Link & Physical Layers — Choose the radio that matches the device power budget
-4 | Thread Mesh (6LoWPAN + IEEE 802.15.4, 250 kbps) — Coin-cell & low-power sensors | Mesh | green
-3 | Wi-Fi (IEEE 802.11, 50+ Mbps) — Mains-powered appliances | Star | amber
-3 | Ethernet (IEEE 802.3) — Bridges & controllers | Wired | purple
+```stack
+Matter | L7 | Clusters, attributes and commands, in TLV | teal
+Security | CASE, PASE | Sessions from certificates, or a setup code | purple
+Transport | UDP, TCP | With Matter's own retries (MRP) | blue
+Network | IPv6 | Routing, mDNS discovery | navy
+Adaptation | 6LoWPAN | Header compression: Thread only | green
+Link | 802.15.4, Wi-Fi, Ethernet | Choose by power budget | grey
+side: The same on every link | 1-4 | teal
+side: Thread | 5-6 | green
 ```
 
-## 2. Inside a self-healing Thread mesh
+## 2. A Thread mesh
 
-A Thread network eliminates single points of failure by dynamically electing a **Leader** and promoting **Router-Eligible End Devices (`REEDs`)** whenever a link drops:
+A Thread network elects a **leader**, and promotes **router-eligible end devices** when a link fails:
 
 ```mermaid
 flowchart LR
-  Phone["Phone / Controller\n(Wi-Fi / LAN IPv6)"] --> BR1["Thread Border Router 1\n(Wi-Fi <-> 802.15.4)"]
-  Phone --> BR2["Thread Border Router 2\n(Redundant Path)"]
-  BR1 & BR2 --> R1["Thread Leader\n(Mains Light Switch)"]
-  BR1 & BR2 --> R2["Thread Router\n(Smart Plug)"]
-  R1 <-->|"Mesh Link"| R2
-  R1 --> SED1["Sleepy End Device\n(Door Sensor, Coin Cell)"]
-  R2 --> SED2["Synchronised SED\n(Thermostat)"]
+  Phone["Phone or hub, on Wi-Fi"] --> BR1["Border router 1"]
+  Phone --> BR2["Border router 2"]
+  BR1 & BR2 --> R1["Leader: light switch"]
+  BR1 & BR2 --> R2["Router: smart plug"]
+  R1 <--> R2
+  R1 --> SED1["Sleepy end device: door sensor"]
+  R2 --> SED2["Synchronised SED: thermostat"]
 ```
 
-[[CAPTION:Figure]] Border Routers forward IPv6 packets transparently without decrypting the end-to-end Matter payload.
+[[CAPTION:Figure]] Border routers forward IPv6 without decrypting the Matter payload.
 
-## 3. Thread device roles & sleep modes
-
-Thread separates devices into **Full Thread Devices (`FTDs`)** that stay awake to route packets, and **Minimal Thread Devices (`MTDs`)** that conserve battery:
+## 3. Device roles
 
 ```cards cols=1 style=label
-Thread Border Router | Bridges the 802.15.4 mesh to the local Wi-Fi or Ethernet IPv6 network; multiple Border Routers provide automatic failover
-Thread Router & Leader | Mains-powered node (Up to 32 active Routers per mesh) that keeps its radio receiver on continuously to forward packets and buffer messages for sleeping children
-Sleepy End Device (SED) | Battery-powered child node that sleeps with its radio off and wakes periodically to poll its parent Router for buffered downlink messages
-Synchronised SED (`SSED`) | Uses Coordinated Sampled Listening (`CSL`) to wake on a microsecond schedule shared with its parent Router, slashing polling energy
+Border router | Joins the 802.15.4 mesh to Wi-Fi or Ethernet; several give automatic failover
+Router and leader | Mains powered, receiver always on, up to 32 in a mesh: forwards packets and holds messages for sleeping children
+Sleepy end device | On a battery: sleeps with the radio off, and wakes to poll its parent for messages
+Synchronised SED | Wakes at times agreed with its parent (CSL), so it barely needs to poll
 ```
 
-## 4. How `6LoWPAN` compresses 48 bytes into 3 bytes
+## 4. 6LoWPAN: 48 bytes into a few
 
-A standard **IPv6** header (`40 bytes`) plus a **UDP** header (`8 bytes`) would consume **38%** of a 127-byte `IEEE 802.15.4` radio frame (`RFC 4944` / `RFC 6282`). **`6LoWPAN`** strips redundant fields and reconstructs them from the 802.15.4 **Media Access Control (MAC)** header and shared mesh prefix:
+An IPv6 header (40 B) and a UDP header (8 B) would take a third of a 127-byte frame. 6LoWPAN leaves out everything the receiver can work out from the MAC header and the mesh prefix:
 
-| Header Field | Standard IPv6 + UDP | `6LoWPAN` (`IPHC`) | How the receiver reconstructs it |
+```figure
+@segments
+title: A 127-byte 802.15.4 frame, uncompressed
+23 | MAC header and security | 23 B | grey
+48 | IPv6 and UDP | 48 B | red
+56 | Payload | 56 B | green
++++
+@segments
+title: The same frame with 6LoWPAN (IPHC)
+23 | MAC header and security | 23 B | grey
+6 | Compressed IPv6 and UDP | 6 B | amber
+98 | Payload | 98 B | green
+```
+
+| Field | Uncompressed | Compressed | Rebuilt from |
 |---|---|---|---|
-| IPv6 Version, Traffic, Flow | `4 bytes` | `1 byte` | Elided when default zero |
-| IPv6 Source & Dest Address | `32 bytes` (`2 × 128-bit`) | **`0 to 2 bytes`** | Derived from mesh prefix + 16-bit short MAC address |
-| UDP Ports & Checksum | `8 bytes` | **`2 to 4 bytes`** | Compressed when using well-known port range (`0xF0B0`) |
-| **Total Header Overhead** | **`48 bytes`** | **`3 to 7 bytes`** | Leaves `> 100 bytes` for encrypted payload! |
+| Version, traffic class, flow | 4 B | Under 1 B | Defaults of zero |
+| Source and destination | 32 B | **0 to 2 B** | The mesh prefix and the 16-bit MAC address |
+| UDP ports and checksum | 8 B | **2 to 4 B** | Ports in the range 0xF0B0 to 0xF0BF |
 
-## 5. Matter data model & commissioning
+## 5. The Matter data model
 
-Every Matter device exposes a structured tree of **Nodes**, **Endpoints**, **Clusters** and **Attributes**, commissioned securely over **Bluetooth Low Energy (BLE)**:
-
-```lcd cols=1
-Node (Matter Device: Dimmable Smart Plug)
- ├── Endpoint 0 (Root Node: Commissioning, Network, OTA)
- └── Endpoint 1 (On/Off Plug-in Unit)
-      ├── Cluster 0x0003: Identify (Server)
-      ├── Cluster 0x0006: On/Off -> Attribute 0x0000: OnOff (bool)
-      └── Cluster 0x0008: Level Control -> CurrentLevel (uint8)
--- Multi-Admin lets multiple ecosystems (Apple, Google, Home Assistant)
--- join the same device on independent cryptographic Fabrics!
+```text
+Node: dimmable plug
+├── Endpoint 0: root (commissioning, network, OTA)
+└── Endpoint 1: on/off plug-in unit
+    ├── Cluster 0x0003 Identify
+    ├── Cluster 0x0006 On/Off        → attribute 0x0000 OnOff (bool)
+    └── Cluster 0x0008 Level Control → CurrentLevel (uint8)
 ```
 
-## 6. Commissioning & security workflow
+With **multi-admin**, Apple Home, Google Home and Home Assistant can all control one device, each on its own **fabric**.
 
-```steps
-1. BLE Discovery & PASE | Controller scans the Quick Response (`QR`) code or Manual Pairing Code, connects over `BLE`, and runs Password-Authenticated Session Establishment (`PASE` via `SPAKE2+`)
-2. Attestation Verification | Controller verifies the device's factory Device Attestation Certificate (`DAC`) against the Distributed Compliance Ledger (`DCL`) to prove genuine hardware | teal
-3. Network & Fabric Join | Controller installs an Operational Certificate (`NOC`) for its Fabric and passes Thread Operational Dataset credentials (or Wi-Fi credentials) | blue
-4. CASE Operational Comms | Device joins the Thread/Wi-Fi IPv6 network, advertises via Multicast DNS (`mDNS`), and communicates using Certificate-Authenticated Session Establishment (`CASE`) | green
+## 6. Commissioning {.wide}
+
+```steps cols=4
+Discover, PASE | Scan the QR code, connect over BLE, and agree a session from the setup code (SPAKE2+) | teal
+Attestation | Check the device's factory certificate against the Distributed Compliance Ledger: genuine hardware | navy
+Join the fabric | Install an operational certificate, and hand over the Thread or Wi-Fi credentials | blue
+CASE | The device joins the network, announces itself with mDNS, and talks over certificate-based sessions | green
 ```
 
-## 7. Mesh & Matter engineering checklist {style=card colour=teal}
+## 7. Checklist {style=card colour=teal}
 
 ```checklist
-[x] Configure battery sensors as Sleepy End Devices (`SED`) or Synchronised SEDs (`CSL`) so the 802.15.4 radio never idles in receive mode
-[x] Size Flash (`>= 1 MB`) and Static Random-Access Memory (`>= 256 KB SRAM`) to accommodate the Matter stack, Thread stack and dual-bank OTA slot
-[x] Inject a unique factory Device Attestation Certificate (`DAC`) and private key into secure storage during manufacturing
-[x] Support at least 5 concurrent Matter **Fabrics** so users can share the device across multiple smart-home controllers simultaneously
+[x] Battery sensors as sleepy or synchronised end devices, never idling in receive
+[x] At least 1 MB of flash and 256 KB of RAM, for Matter, Thread and a second OTA slot
+[x] A unique attestation certificate and key put in secure storage at the factory
+[x] At least five fabrics supported, so several controllers can share a device
 ```
 
-## 8. Acronym guide: every term defined {.wide}
+## 8. Glossary
 
-```cards cols=4 style=label
-6LoWPAN | IPv6 over Low-Power Wireless Personal Area Networks: compresses IPv6 headers to fit 127-byte 802.15.4 frames
-FTD & MTD | Full Thread Device (can act as Router/Leader) and Minimal Thread Device (end device that never routes)
-SED & CSL | Sleepy End Device (radio off in sleep) and Coordinated Sampled Listening (scheduled low-power receive window)
-PASE & CASE | Password-Authenticated (commissioning via QR code) and Certificate-Authenticated (operational) Session Establishment
-DAC & NOC | Device Attestation Certificate (factory hardware identity) and Node Operational Certificate (per-Fabric identity)
-mDNS & DNS-SD | Multicast Domain Name System and DNS-Based Service Discovery: local zero-configuration IPv6 discovery
-MRP & TLV | Message Reliability Protocol (Matter UDP retry layer) and Tag-Length-Value compact binary payload encoding
-IEEE 802.15.4 | Institute of Electrical and Electronics Engineers standard defining the 250 kbps low-power radio physical/MAC layer
+```glossary cols=1
+6LoWPAN | IPv6 over low-power wireless personal area networks
+CASE, PASE | Certificate- and passcode-authenticated session establishment
+CSL | Coordinated sampled listening
+DAC, NOC | Device attestation and node operational certificates
+FTD, MTD | Full and minimal Thread devices
+MRP | Matter's message reliability protocol
+SED | Sleepy end device
+TLV | Tag-length-value encoding
 ```
 
 ## In short {.summary}
 
-Use **Thread (`6LoWPAN` over `802.15.4`)** to give battery sensors a self-healing IPv6 mesh with no single point of failure. Layer **Matter** on top so Thread, Wi-Fi and Ethernet devices speak one common language.
+Thread gives battery sensors a self-healing IPv6 mesh with no single point of failure. Matter on top lets Thread, Wi-Fi and Ethernet devices speak one language.
 
-### End-to-end IPv6 kills hubs
+### IPv6 all the way removes the hub
 
-Because Thread carries real IPv6 packets, a Border Router forwards frames directly without knowing or decrypting application data.
+A border router forwards packets without knowing or decrypting what is in them.
 
-### Sleepy nodes poll their parent
+### Sleepy nodes ask their parent
 
-A Thread Sleepy End Device wakes on its own schedule; its mains-powered parent Router holds incoming packets until it asks.
+The router holds messages until its sleeping child wakes and asks.
 
-### One device, multiple fabrics
+### One device, many fabrics
 
-Matter's Multi-Admin cryptography lets a homeowner control the same lock from local Home Assistant, Apple Home and Google Home simultaneously.
+One lock, controlled from Home Assistant, Apple Home and Google Home at once.

@@ -1,151 +1,150 @@
 ---
 title: "Industrial Fieldbus Protocols: Modbus and CANopen"
-subtitle: Polling registers over RS-485 and Ethernet versus event-driven object dictionaries on controller area networks
-byline: Industrial Automation & Vehicular Networking Explainer
+subtitle: Polled registers over RS-485 and Ethernet, against event-driven object dictionaries on CAN
+byline: IoT protocols
 orientation: landscape
-columns: 2
+columns: 3
 paper: a1
 width: 1750
 document_number: PO-021
-version: "1.0"
 colours:
   accent: "#d97706"
   secondary: "#b45309"
 footer:
-  left: Modbus & CANopen Industrial Explainer
-  centre: Industrial Fieldbus Reference
-  right: Modbus RTU/TCP, CANopen & SAE J1939 Guide
+  left: Modbus and CANopen
+  centre: IoT Protocols Reference
   qr: https://modbus.org/specs.php
-  qr-label: Modbus & CANopen Specs
+  qr-label: Modbus specifications
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 4 tables | Modbus data model: Coils, Discrete Inputs, Input & Holding Registers | 16-bit words | good |
-| 247 nodes | Maximum logical responder addresses on a Modbus serial network | `1` to `247` (`0` = broadcast) | good |
-| 8 bytes | Classic CANopen Process Data Object (`PDO`) real-time payload | zero protocol header | good |
-| 29-bit ID | Extended ID used by `SAE J1939` Parameter Group Numbers (PGN) | priority + PGN + source | good |
+| Value | Label |
+|---|---|
+| 4 tables | In the Modbus data model: coils, inputs, input and holding registers |
+| 247 | Device addresses on a Modbus serial line; 0 is broadcast |
+| 8 bytes | In a classic CANopen PDO, with no protocol header |
+| 29 bits | In a J1939 identifier: priority, PGN and source |
 
 ## Introduction {.abstract}
 
-Factories, solar farms and heavy vehicles rely on two families of industrial protocols over differential twisted-pair cables. **Modbus**—operating as **Remote Terminal Unit (RTU)** over **Recommended Standard 485 (`RS-485`)** or over **Transmission Control Protocol (TCP)**—polls four flat tables of 1-bit coils and 16-bit registers. **Controller Area Network (CAN)** protocols—led by **CANopen** and **`SAE J1939`**—use a structured **Object Dictionary**. Nodes broadcast real-time **Process Data Objects (`PDOs`)** on events without waiting for a poll.
+Factories, solar farms and heavy vehicles run on two families of protocol over twisted pair. **Modbus**, as RTU over **RS-485** or over **TCP**, polls four flat tables of bits and 16-bit registers. **CAN** protocols, **CANopen** and **SAE J1939**, organise data in a dictionary, and let any node broadcast an event without waiting to be asked.
 
-## 1. Modbus data model & function codes
+## 1. The Modbus data model
 
-Every Modbus device exposes up to four address tables. Watch out for the classic **1-based documentation vs 0-based wire address** offset (`Register 40001` in a manual is wire address `0x0000` with Function Code `0x03`):
+Beware the off-by-one: register **40001** in a manual is wire address **0x0000**, read with function code 0x03.
 
-| Modbus Table | Bit Width | Access | Classic Doc Prefix | Wire Function Codes (`Hex`) |
+| Table | Width | Access | Manual prefix | Function codes |
 |---|---|---|---|---|
-| **Coils** | `1-bit` boolean | Read / Write | `0xxxx` (`00001..`) | `0x01` Read, `0x05` Write Single, `0x0F` Write Multiple |
-| **Discrete Inputs** | `1-bit` boolean | Read-Only | `1xxxx` (`10001..`) | `0x02` Read Discrete Inputs |
-| **Input Registers** | `16-bit` word | Read-Only | `3xxxx` (`30001..`) | `0x04` Read Input Registers (sensors, analogue readings) |
-| **Holding Registers** | `16-bit` word | Read / Write | `4xxxx` (`40001..`) | `0x03` Read, `0x06` Write Single, `0x10` Write Multiple |
+| Coils | 1 bit | Read and write | 0xxxx | 0x01 read; 0x05, 0x0F write |
+| Discrete inputs | 1 bit | Read only | 1xxxx | 0x02 |
+| Input registers | 16 bits | Read only | 3xxxx | 0x04 |
+| Holding registers | 16 bits | Read and write | 4xxxx | 0x03 read; 0x06, 0x10 write |
 
-```figure
-@segments
-title: Modbus RTU Frame over RS-485 (Big-Endian registers, Little-Endian CRC-16!)
-1 | Slave ID (1 B) | 1..247 | navy
-1 | Func Code (1 B) | e.g. 0x03 | amber
-4 | Data: Start Address (2 B) + Register Count / Values (N B) | Big-Endian! | blue
-2 | CRC-16/MODBUS (2 B) | Low byte first! | teal
-+++
-@segments
-title: Modbus TCP Frame over Ethernet (Port 502 — replaces CRC with 7-byte MBAP Header)
-4 | MBAP Header: Transaction ID (2 B) + Protocol ID 0x0000 (2 B) + Length (2 B) + Unit ID (1 B) | 7 B | purple
-4 | PDU: Function Code (1 B) + Register Address & Payload (N B) | Identical PDU | blue
+Over TCP (port 502), the CRC is dropped and a 7-byte **MBAP** header goes in front: transaction ID, protocol 0, length and unit ID. The PDU inside is the same.
+
+## 2. A request on the wire
+
+Read two holding registers from address 0x006B, on device 1:
+
+```hex-dissect cols=8 title="Request" ascii=no
+bytes: 01 03 00 6b 00 02 b5 d7
+0 | Device | 1 | navy
+1 | Function | 0x03: read holding registers | amber
+2-3 | Start address | 0x006B = 107: register 40108 | blue
+4-5 | Count | 2 registers | blue
+6-7 | CRC-16/MODBUS | 0xD7B5, low byte first | teal
 ```
 
-## 2. Decoding a live Modbus transaction
+## 3. The reply
 
-```lcd cols=1
-TX (Controller -> Node 0x01: Read 2 Holding Registers starting at 0x006B):
-  [01] [03] [00 6B] [00 02] [B5 D6]
-  ID=1  FC=3  Addr=107 Count=2 CRC=0xD6B5 (sent low-byte 0xB5 first!)
-
-RX (Node 0x01 -> Controller: Returns 4 bytes = 2 × 16-bit registers):
-  [01] [03] [04] [02 2B] [00 64] [CA 63]
-  Reg 107 = 0x022B (55.5 C), Reg 108 = 0x0064 (100 RPM)
--- If an error occurs, Responder sets MSB of Function Code (0x83) + Exception Code!
+```hex-dissect cols=8 title="Response" ascii=no
+bytes: 01 03 04 02 2b 00 64 8a 68
+0 | Device | 1 | navy
+1 | Function | 0x03 | amber
+2 | Byte count | 4 | grey
+3-4 | Register 107 | 0x022B = 555: 55.5 °C | green
+5-6 | Register 108 | 0x0064 = 100 rpm | green
+7-8 | CRC | 0x688A, low byte first | teal
 ```
+
+On an error the device sets the top bit of the function code (0x83) and returns an exception code.
 
 > [!WARNING]
-> Standard Modbus defines how to send **16-bit registers**, not 32-bit floats (`IEEE 754`). Vendors split 32-bit values across two registers in four possible byte/word orders (`ABCD`, `CDAB`, `BADC`, `DCBA`). Always document your word endianness!
+> Modbus defines 16-bit registers, not 32-bit floats. Vendors split them across two registers in four orders: ABCD, CDAB, BADC, DCBA. **Document yours.**
 
-## 3. CANopen & `SAE J1939`: beyond polling {.wide}
+## 4. Polling, or events {.wide}
 
-Because `RS-485` has no hardware collision arbitration, a Modbus sensor can never speak until the **Programmable Logic Controller (PLC)** polls it. **CANopen** (`CiA 301`) and **`SAE J1939`** leverage CAN bus bitwise arbitration so any node can transmit an urgent event immediately:
+RS-485 has no arbitration, so a Modbus device speaks only when the PLC polls it. CAN arbitrates bit by bit, so any CANopen or J1939 node can send an urgent message at once:
 
-```mermaid
-flowchart LR
-  subgraph Modbus ["Modbus RTU / TCP (Controller-Responder Polling)"]
-    PLC["PLC Controller\n(Single Master)"] -->|"1. Poll Node 1"| N1["Drive 1"]
-    N1 -->|"2. Reply"| PLC
-    PLC -->|"3. Poll Node 2"| N2["Sensor 2"]
-    N2 -->|"4. Reply"| PLC
-  end
-  subgraph CAN ["CANopen (Object Dictionary + Event/Sync PDOs)"]
-    OD["Every Node has a 16-bit\nObject Dictionary (Index:Sub)"] --> SDO["SDO (Service Data Object)\nConfirmed setup & config"]
-    OD --> PDO["PDO (Process Data Object)\nFast 8-B real-time broadcast"]
-    OD --> NMT["NMT & Heartbeat\nNetwork state & node guarding"]
-  end
+```lanes
+Modbus | *Poll drive 1 | *Reply | *Poll sensor 2 | *Reply | An alarm waits for its turn
+CANopen | *Sync | *PDOs from every node | *EMCY the moment a fault occurs | *Heartbeats
 ```
 
 ```compare
-| Modbus RTU (`RS-485`) | Modbus TCP (`Ethernet`) | CANopen (`CiA 301` over CAN) | `SAE J1939` (Heavy Vehicles)
-Physical layer | `RS-485` twisted pair (`9.6`–`115.2 kbps`) | Standard Ethernet (`100 Mbps`, port `502`) | `ISO 11898` CAN (`125 kbps`–`1 Mbps`) | `ISO 11898` CAN (`250` / `500 kbps`)
-Communication model | Strict Master-Slave polling | Client-Server request/response | Peer-to-peer **PDO** + Client-Server **SDO** | Cyclic & event broadcast **PGNs**
-Urgent alarm latency | Slow (must wait for poll turn) | Fast if polled frequently | **Sub-millisecond** (high-priority `EMCY` frame) | **Millisecond** (priority 0–7 in 29-bit ID)
-Data organisation | Flat 16-bit register numbers | Flat 16-bit register numbers | Standardised `[16-bit Index : 8-bit Subindex]` | Standardised **Parameter Group Numbers (`PGN`)** & `SPNs`
+| Modbus RTU | Modbus TCP | CANopen (CiA 301) | SAE J1939
+Physical | RS-485, 9.6 to 115.2 kbps | Ethernet, port 502 | CAN, 125 kbps to 1 Mbps | CAN, 250 or 500 kbps
+Model | Master and slaves, polled | Client and server | **PDOs** peer to peer, **SDOs** client and server | Cyclic and event broadcasts of **PGNs**
+Alarm latency | Slow: waits to be polled | Fast if polled often | **Under a millisecond**: high-priority EMCY | **Milliseconds**: priority 0 to 7 in the ID
+Data | Flat register numbers | Flat register numbers | Standard **index and subindex** | Standard **PGNs** and SPNs
 ```
 
-## 4. Inside a CANopen object dictionary
+## 5. The CANopen object dictionary
 
-Every parameter in a CANopen device lives at a 16-bit **Index** and 8-bit **Subindex** (`0x1000–0x1FFF` communication profile, `0x2000–0x5FFF` vendor specific, `0x6000+` device profile such as `CiA 402` motor drives). The 11-bit CAN Identifier (**Communication Object Identifier, `COB-ID`**) encodes a 4-bit **Function Code** and 7-bit **Node ID (`1..127`)**:
+Every parameter has a 16-bit index and 8-bit subindex. The ranges are 0x1000 to 0x1FFF for communication, 0x2000 to 0x5FFF for the vendor, 0x6000 and up for device profiles such as CiA 402 drives.
 
-```cards cols=4 style=top
-NMT (COB-ID 0x000) | Network Management: transitions nodes between Initialising, Pre-Operational, Operational and Stopped states | navy
-EMCY (0x080 + NodeID) | Emergency Object: high-priority 8-byte fault frame transmitted immediately when hardware detects an error | red
-TPDO / RPDO (0x180..0x57F) | Transmit & Receive Process Data Objects: pack up to 64 bits of mapped Object Dictionary variables with zero protocol overhead | green
-SDO (0x580 / 0x600 + ID) | Service Data Object: confirmed read/write mailbox to any `[Index:Subindex]` for configuration and firmware updates | amber
+The 11-bit **COB-ID** is a 4-bit function code and a 7-bit node ID. TPDO1 from node 1 is 0x181:
+
+```tape
+cells: 0 0 1 1 0 0 0 0 0 0 1
+1-4 | Function 3: TPDO1 | green
+5-11 | Node 1 | navy
 ```
 
-## 5. Fieldbus implementation checklist {style=card colour=amber}
+## 6. CANopen objects
+
+```cards cols=1 style=top
+NMT, ID 0x000 | Network management: moves nodes between pre-operational, operational and stopped | navy
+EMCY, 0x080 + node | Emergency: a high-priority fault frame, sent at once | red
+PDOs, 0x180 to 0x57F | Process data: up to 64 bits of mapped variables, with no overhead | green
+SDO, 0x580 and 0x600 + node | Service data: confirmed reads and writes of any entry, for set-up and updates | amber
+```
+
+## 7. Checklist {style=card colour=amber}
 
 ```checklist
-[x] Document Modbus register addresses using **both** 0-based wire offset (`0x006B`) and 1-based PLC notation (`40108`)
-[x] Specify exact byte and word order (`Big-Endian ABCD` vs `Word-Swapped CDAB`) for all 32-bit `float` and `int32` register pairs
-[x] Return standard Modbus Exception Codes (`0x01` Illegal Function, `0x02` Illegal Address, `0x03` Illegal Value) instead of timing out silently
-[x] Ship an Electronic Data Sheet (`.eds` file) for every CANopen product so PLC tools can map `PDOs` and `SDOs` automatically
-[x] Implement galvanic isolation (`2.5 kV` digital isolator + isolated DC-DC) on industrial `RS-485` and `CAN` transceivers
+[x] Give Modbus addresses both ways: wire offset 0x006B and PLC register 40108
+[x] State the word order of every 32-bit value
+[x] Return exception codes (0x01 function, 0x02 address, 0x03 value), never silence
+[x] Ship an EDS file with every CANopen product
+[x] Isolate RS-485 and CAN transceivers: a 2.5 kV isolator and an isolated supply
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 8. Glossary
 
-```cards cols=4 style=label
-RTU & PDU | Remote Terminal Unit (binary serial framing) and Protocol Data Unit (Function Code + Data inside Modbus)
-MBAP | Modbus Application Protocol header: 7-byte prefix added to Modbus PDU when carried over TCP/IP port 502
-PLC & HMI | Programmable Logic Controller (industrial control computer) and Human-Machine Interface (operator touch panel)
-COB-ID | Communication Object Identifier: the 11-bit CAN frame ID split into a 4-bit Function Code and 7-bit Node ID
-PDO & SDO | Process Data Object (fast unconfirmed real-time broadcast) and Service Data Object (confirmed dictionary access)
-NMT & EMCY | Network Management (node state machine control) and Emergency high-priority fault message in CANopen
-EDS & OD | Electronic Data Sheet (INI-style device description file) and Object Dictionary (`[Index:Subindex]` table)
-PGN & SPN | Parameter Group Number (message ID) and Suspect Parameter Number (signal field) in SAE J1939 truck networks
+```glossary cols=1
+COB-ID | Communication object identifier: the CAN ID
+EDS | Electronic data sheet of a CANopen device
+MBAP | Modbus application protocol header, for TCP
+PDO, SDO | Process and service data objects
+PGN, SPN | J1939 parameter group and suspect parameter numbers
+PLC | Programmable logic controller
+RTU | Modbus's binary serial framing
 ```
 
 ## In short {.summary}
 
-Use **Modbus RTU (`RS-485`)** or **Modbus TCP** for PLCs and meters that expect simple polled registers. Use **CANopen** or **`SAE J1939`** when drives, sensors and actuators need millisecond event-driven coordination.
+Use Modbus for PLCs and meters that expect polled registers. Use CANopen or J1939 when drives and sensors must coordinate within milliseconds.
 
-### Beware the off-by-one address trap
+### Mind the off-by-one
 
-Always list both the hexadecimal wire address (`0x0000`) and the traditional 5-digit PLC address (`40001`) in your manual.
+List both the hex wire address and the five-digit PLC register.
 
-### Broadcast fast data, poll configuration
+### Configure once, stream fast
 
-Configure a CANopen motor drive at startup via `SDO`, then stream velocity setpoints and encoder feedback in 8-byte `PDOs`.
+Set a drive up with SDOs at start-up, then stream setpoints and feedback in PDOs.
 
-### Isolate field wiring
+### Isolate the field wiring
 
-Factory ground loops destroy unprotected microcontrollers; always isolate industrial `RS-485` and `CAN` interfaces.
+Factory ground loops destroy unprotected microcontrollers.

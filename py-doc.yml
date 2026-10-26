@@ -1,0 +1,168 @@
+# py-doc project: every poster under posters/, built to build/ with a one-page PDF of each.
+#   py-doc poster                 every poster
+#   py-doc poster git --watch     one, rebuilt and reloaded on every save
+#   py-doc poster --pdf           every poster and its PDF
+# CI checks that every Markdown file under posters/ has an entry here.
+
+poster:
+  pdf: true
+  version: git                    # the release tag, such as v1.2.0, under the footer
+  embed_fonts: [latin, latin-ext] # the page looks the same offline
+
+posters:
+  orbital-mechanics:
+    source: posters/aerospace/spaceflight/orbital-mechanics.md
+    output: build/aerospace/spaceflight/orbital-mechanics.html
+  llm-transformers:
+    source: posters/ai/language-models/llm-transformers.md
+    output: build/ai/language-models/llm-transformers.html
+  cosmology-big-bang:
+    source: posters/astronomy/cosmology/cosmology-big-bang.md
+    output: build/astronomy/cosmology/cosmology-big-bang.html
+  galaxies-cosmic-web:
+    source: posters/astronomy/cosmology/galaxies-cosmic-web.md
+    output: build/astronomy/cosmology/galaxies-cosmic-web.html
+  hubble-cosmic-expansion:
+    source: posters/astronomy/cosmology/hubble-cosmic-expansion.md
+    output: build/astronomy/cosmology/hubble-cosmic-expansion.html
+  cosmic-rays-neutrinos:
+    source: posters/astronomy/observation/cosmic-rays-neutrinos.md
+    output: build/astronomy/observation/cosmic-rays-neutrinos.html
+  multi-wavelength-telescopes:
+    source: posters/astronomy/observation/multi-wavelength-telescopes.md
+    output: build/astronomy/observation/multi-wavelength-telescopes.html
+  asteroids-comets-defence:
+    source: posters/astronomy/planetary-science/asteroids-comets-defence.md
+    output: build/astronomy/planetary-science/asteroids-comets-defence.html
+  astrobiology-fermi-paradox:
+    source: posters/astronomy/planetary-science/astrobiology-fermi-paradox.md
+    output: build/astronomy/planetary-science/astrobiology-fermi-paradox.html
+  exoplanets-detection:
+    source: posters/astronomy/planetary-science/exoplanets-detection.md
+    output: build/astronomy/planetary-science/exoplanets-detection.html
+  solar-system-icy-moons:
+    source: posters/astronomy/planetary-science/solar-system-icy-moons.md
+    output: build/astronomy/planetary-science/solar-system-icy-moons.html
+  solar-system-space-weather:
+    source: posters/astronomy/planetary-science/solar-system-space-weather.md
+    output: build/astronomy/planetary-science/solar-system-space-weather.html
+  black-holes-relativity:
+    source: posters/astronomy/stars/black-holes-relativity.md
+    output: build/astronomy/stars/black-holes-relativity.html
+  globular-clusters-stellar-ages:
+    source: posters/astronomy/stars/globular-clusters-stellar-ages.md
+    output: build/astronomy/stars/globular-clusters-stellar-ages.html
+  interstellar-medium-nebulae:
+    source: posters/astronomy/stars/interstellar-medium-nebulae.md
+    output: build/astronomy/stars/interstellar-medium-nebulae.html
+  neutron-stars-pulsars:
+    source: posters/astronomy/stars/neutron-stars-pulsars.md
+    output: build/astronomy/stars/neutron-stars-pulsars.html
+  stellar-evolution-fusion:
+    source: posters/astronomy/stars/stellar-evolution-fusion.md
+    output: build/astronomy/stars/stellar-evolution-fusion.html
+  embedded-rust-vs-c:
+    source: posters/embedded/firmware/embedded-rust-vs-c.md
+    output: build/embedded/firmware/embedded-rust-vs-c.html
+  event-driven-hsm:
+    source: posters/embedded/firmware/event-driven-hsm.md
+    output: build/embedded/firmware/event-driven-hsm.html
+  misra-defensive-c:
+    source: posters/embedded/firmware/misra-defensive-c.md
+    output: build/embedded/firmware/misra-defensive-c.html
+  superloop-vs-rtos:
+    source: posters/embedded/firmware/superloop-vs-rtos.md
+    output: build/embedded/firmware/superloop-vs-rtos.html
+  adc-pwm-dma:
+    source: posters/embedded/hardware/adc-pwm-dma.md
+    output: build/embedded/hardware/adc-pwm-dma.html
+  low-power:
+    source: posters/embedded/hardware/low-power.md
+    output: build/embedded/hardware/low-power.html
+  mcu-vs-mpu:
+    source: posters/embedded/hardware/mcu-vs-mpu.md
+    output: build/embedded/hardware/mcu-vs-mpu.html
+  memory-bootloader:
+    source: posters/embedded/hardware/memory-bootloader.md
+    output: build/embedded/hardware/memory-bootloader.html
+  pid-filtering:
+    source: posters/embedded/hardware/pid-filtering.md
+    output: build/embedded/hardware/pid-filtering.html
+  serial-buses:
+    source: posters/embedded/hardware/serial-buses.md
+    output: build/embedded/hardware/serial-buses.html
+  debug-trace:
+    source: posters/embedded/test-and-debug/debug-trace.md
+    output: build/embedded/test-and-debug/debug-trace.html
+  embedded-testing-hil:
+    source: posters/embedded/test-and-debug/embedded-testing-hil.md
+    output: build/embedded/test-and-debug/embedded-testing-hil.html
+  electrical-grid:
+    source: posters/energy/power-grid/electrical-grid.md
+    output: build/energy/power-grid/electrical-grid.html
+  ble-gatt:
+    source: posters/iot/connectivity/ble-gatt.md
+    output: build/iot/connectivity/ble-gatt.html
+  gnss-time-sync:
+    source: posters/iot/connectivity/gnss-time-sync.md
+    output: build/iot/connectivity/gnss-time-sync.html
+  lpwan:
+    source: posters/iot/connectivity/lpwan.md
+    output: build/iot/connectivity/lpwan.html
+  matter-thread:
+    source: posters/iot/connectivity/matter-thread.md
+    output: build/iot/connectivity/matter-thread.html
+  nbiot:
+    source: posters/iot/connectivity/nbiot.md
+    output: build/iot/connectivity/nbiot.html
+  cbor-protobuf-json:
+    source: posters/iot/protocols/cbor-protobuf-json.md
+    output: build/iot/protocols/cbor-protobuf-json.html
+  framing-crc:
+    source: posters/iot/protocols/framing-crc.md
+    output: build/iot/protocols/framing-crc.html
+  lwm2m:
+    source: posters/iot/protocols/lwm2m.md
+    output: build/iot/protocols/lwm2m.html
+  modbus-canopen:
+    source: posters/iot/protocols/modbus-canopen.md
+    output: build/iot/protocols/modbus-canopen.html
+  mqtt-coap-http:
+    source: posters/iot/protocols/mqtt-coap-http.md
+    output: build/iot/protocols/mqtt-coap-http.html
+  dna-molecular-machines:
+    source: posters/science/biology/dna-molecular-machines.md
+    output: build/science/biology/dna-molecular-machines.html
+  immune-system:
+    source: posters/science/biology/immune-system.md
+    output: build/science/biology/immune-system.html
+  coffee-extraction-science:
+    source: posters/science/chemistry/coffee-extraction-science.md
+    output: build/science/chemistry/coffee-extraction-science.html
+  c4-model:
+    source: posters/software/architecture/c4-model.md
+    output: build/software/architecture/c4-model.html
+  domain-driven-design:
+    source: posters/software/architecture/domain-driven-design.md
+    output: build/software/architecture/domain-driven-design.html
+  hexagonal-clean-arch:
+    source: posters/software/architecture/hexagonal-clean-arch.md
+    output: build/software/architecture/hexagonal-clean-arch.html
+  resilience-patterns:
+    source: posters/software/architecture/resilience-patterns.md
+    output: build/software/architecture/resilience-patterns.html
+  docker-containers:
+    source: posters/software/practices/docker-containers.md
+    output: build/software/practices/docker-containers.html
+  git:
+    source: posters/software/practices/git.md
+    output: build/software/practices/git.html
+  pki-x509-hsm:
+    source: posters/software/security/pki-x509-hsm.md
+    output: build/software/security/pki-x509-hsm.html
+  sbom-security:
+    source: posters/software/security/sbom-security.md
+    output: build/software/security/sbom-security.html
+  tls-dtls:
+    source: posters/software/security/tls-dtls.md
+    output: build/software/security/tls-dtls.html

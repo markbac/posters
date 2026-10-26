@@ -1,168 +1,162 @@
 ---
 title: "Closed-Loop Control and Sensor Filtering"
-subtitle: Tuning Proportional-Integral-Derivative controllers and cleaning noisy analogue signals in firmware
-byline: Embedded Control Systems & Digital Signal Processing Explainer
+subtitle: Tuning PID controllers, and cleaning noisy signals in firmware
+byline: Embedded hardware engineering
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-017
-version: "1.0"
 colours:
   accent: "#2563eb"
   secondary: "#1d4ed8"
 footer:
-  left: PID Control & Filtering Explainer
-  centre: Control & Signal Processing Reference
-  right: PID Tuning, Anti-Windup, EMA & Kalman Guide
+  left: PID and Filtering
+  centre: Embedded Engineering Reference
   qr: https://en.wikipedia.org/wiki/PID_controller
-  qr-label: PID Control Theory
+  qr-label: PID controllers on Wikipedia
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 3 terms | Proportional (`P`), Integral (`I`) and Derivative (`D`) control actions | present, past, future | good |
-| Fixed dt | Deterministic sample period (`Δt`) required for discrete digital control | timer interrupt | good |
-| 3 lines | Code required for a first-order Exponential Moving Average (EMA) filter | zero array RAM | good |
-| Windup | Actuator saturation trap when the Integral sum grows unchecked | clamp required | bad |
+| Value | Label |
+|---|---|
+| 3 terms | Proportional, integral and derivative: the present, past and future of the error |
+| Fixed Δt | A digital loop needs a steady sample period, from a hardware timer |
+| 1 variable | Of RAM for an exponential moving average filter |
+| Windup | The trap of an integral that grows while the actuator is saturated |
 
 ## Introduction {.abstract}
 
-Whether regulating a heater to `0.1 °C`, holding a drone level or governing motor speed, open-loop commands fail whenever load or supply voltage changes. A **Proportional-Integral-Derivative (PID)** controller closes the loop by subtracting the measurement from the **setpoint** to find the error (`e`) and computing a command at a fixed step (`Δt`). Pairing a discrete PID loop with a digital filter—such as an **Exponential Moving Average (EMA)** or **Kalman filter**—keeps sensor noise from rattling the actuator.
+Whether it holds a heater to 0.1 °C, a drone level or a motor's speed, an open-loop command fails as soon as the load or supply changes. A **PID controller** closes the loop: it subtracts the measurement from the **setpoint** to get the error, and computes a new output at a fixed step. A digital **filter** in front of it keeps sensor noise from shaking the actuator.
 
-## 1. Anatomy of the three PID terms {.wide}
-
-Each term reacts to a different aspect of the error `e(t) = Setpoint - Measurement` before summing into the **Pulse-Width Modulation (PWM)** or **Digital-to-Analogue Converter (DAC)** output:
-
-```cards cols=3 style=top
-Proportional (Kp × e) — The Present | Produces an output proportional to current error. Too little `Kp` responds sluggishly; too much `Kp` causes violent oscillation. Alone, `P` control often leaves a small **steady-state droop** | blue
-Integral (Ki × ∫e dt) — The Past | Accumulates error over time to eliminate steady-state offset against constant loads (such as gravity or heat loss). Must include **anti-windup clamping** when the actuator hits 100% | green
-Derivative (-Kd × d(Measurement)/dt) — The Future | Applies a braking force proportional to the rate of change, damping overshoot. Always compute `D` on the **filtered measurement** (not raw error) to avoid **derivative kick** on setpoint steps | amber
-```
+## 1. The loop {.wide}
 
 ```mermaid
 flowchart LR
-  SP["Setpoint\n(Target r)"] --> Sum(("+ / -"))
-  Sum -->|"Error e(k)"| P["P Term: Kp * e(k)"]
-  Sum -->|"Error e(k)"| I["I Term: Ki * Sum(e * dt)\n(With Anti-Windup Clamp)"]
-  Meas["Filtered Sensor y(k)"] --> D["D Term: -Kd * (y(k) - y(k-1)) / dt\n(Derivative on Measurement)"]
-  P & I & D --> Add(("+"))
-  Add --> Clamp["Output Limiter\n(0% to 100% PWM)"]
-  Clamp --> Plant["Physical Plant\n(Motor / Heater)"]
-  Plant --> ADC["Noisy ADC Read"]
-  ADC --> LPF["Low-Pass Filter\n(EMA / Biquad)"]
-  LPF --> Meas
-  Meas -->|"Feedback (-)"| Sum
+  SP["Setpoint r"] --> Sum(("Σ"))
+  Sum -->|"error e"| P["P: Kp·e"]
+  Sum -->|"error e"| I["I: Ki·Σe·Δt, clamped"]
+  Meas["Filtered y"] --> D["D: −Kd·Δy/Δt"]
+  P & I & D --> Add(("Σ"))
+  Add --> Lim["Limit 0 to 100 %"] --> Plant["Motor or heater"] --> ADC["Noisy ADC"] --> LPF["Filter"] --> Meas
+  Meas -->|"feedback"| Sum
 ```
 
-[[CAPTION:Figure]] Computing the Derivative term on the filtered measurement (`-Kd × dy/dt`) prevents a massive spike when the user changes the setpoint.
-
-## 2. Step response: how tuning shapes behaviour
-
-```chart type=line title="Step response towards 100 °C setpoint across tuning profiles" unit=" C" min=0 max=140 step=20 height=200 colours=green,amber,red values=last
-series: Tuned PID, High Kp, P-Only
-0 s | 20 | 20 | 20
-1 s | 75 | 95 | 65
-2 s | 102 | 132 | 84
-3 s | 100 | 82 | 88
-4 s | 100 | 112 | 89
-5 s | 100 | 98 | 89
+```cards cols=3 style=top
+Proportional: the present | Output in proportion to the error. Too little is sluggish, too much oscillates. Alone, it leaves a **steady droop** | blue
+Integral: the past | Adds up the error, to remove the offset a constant load causes. Needs **anti-windup** when the actuator is at its limit | green
+Derivative: the future | Brakes in proportion to the rate of change. Take it from the **filtered measurement**, not the error, or a setpoint step makes a **derivative kick** | amber
 ```
 
-| Symptom in step test | Root cause | Tuning fix |
-|---|---|---|
-| Slow rise, settles below target | `Kp` too low; no `Ki` | Increase `Kp`; add small `Ki` |
-| Overshoots and rings | `Kp` or `Ki` too aggressive | Increase `Kd` damping or lower `Kp` |
-| High-frequency buzz in actuator | Sensor noise amplified by `Kd` | Low-pass filter sensor before `D` term |
-| Huge overshoot after long ramp | **Integral windup** during 100% saturation | Freeze or clamp `I` term when output saturates |
+## 2. The discrete controller
 
-## 3. Two essential firmware protections
-
-Naive textbook PID equations fail in real hardware without **anti-windup** and **derivative-on-measurement**:
-
-```lcd cols=1
-float pid_step(PID *c, float sp, float meas, float dt) {
-  float err = sp - meas;
-  c->i_sum = clamp(c->i_sum + c->ki * err * dt, c->min, c->max);
-  float d_term = -c->kd * (meas - c->prev_meas) / dt;
-  c->prev_meas = meas;
-  return clamp(c->kp * err + c->i_sum + d_term, c->min, c->max);
-}
--- Production C loop: clamped integral + derivative on measurement
+```equation
+title: PID, one step at a time
+u_k = K_p e_k + K_i \sum_{j \le k} e_j \, \Delta t - K_d \frac{y_k - y_{k-1}}{\Delta t}
+u_k | Output at step k |
+e_k | Error: setpoint minus measurement |
+y_k | Filtered measurement |
+\Delta t | Sample period, from a timer | s
 ```
 
 > [!WARNING]
-> Never run a PID calculation inside a variable-time `while(1)` superloop without measuring time or triggering from a hardware timer. Jitter in `dt` directly corrupts both the Integral (`err × dt`) and Derivative (`Δmeas / dt`) terms.
+> Never run a PID loop in a superloop of varying length. Jitter in Δt corrupts both the integral and the derivative.
 
-## 4. Cleaning noisy sensors before control
+## 3. Step response: what tuning does
 
-An **Analogue-to-Digital Converter (ADC)** reading carries thermal noise, power-supply ripple and quantisation steps. Choose the simplest filter that removes noise without adding excessive **phase lag**:
+```plot type=function from=0 to=6 width=460 height=260 xtitle="Time (s)" ytitle="Temperature (°C)"
+curve: Tuned PID | 20 + 80 * (1 - exp(-1.6 * x) * (cos(1.8 * x) + 0.89 * sin(1.8 * x)))
+curve: Kp too high | 20 + 80 * (1 - exp(-0.6 * x) * (cos(3 * x) + 0.2 * sin(3 * x)))
+curve: P only | 20 + 69 * (1 - exp(-1.2 * x))
+```
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Slow, settles low | Kp too low, no Ki | Raise Kp; add a little Ki |
+| Overshoots and rings | Kp or Ki too high | More Kd, or less Kp |
+| The actuator buzzes | Noise amplified by Kd | Filter before the D term |
+| Huge overshoot after saturation | **Integral windup** | Clamp or freeze I at the limits |
+
+## 4. From textbook to firmware {.wide}
+
+```code-compare
+@bad The textbook loop
+err = sp - meas;
+i_sum += ki * err * dt;                <1>
+d = kd * (err - prev_err) / dt;        <2>
+prev_err = err;
+return kp * err + i_sum + d;           <3>
+@good A production loop
+err = sp - meas;
+i_sum = clamp(i_sum + ki * err * dt, out_min, out_max);
+d = -kd * (meas - prev_meas) / dt;
+prev_meas = meas;
+return clamp(kp * err + i_sum + d, out_min, out_max);
+-- 1 | Grows without limit while the output is saturated: windup
+-- 2 | Derivative of the error: a setpoint step makes a spike
+-- 3 | No limit on the output the actuator can take
+```
+
+## 5. Cleaning the signal first
+
+Pick the simplest filter that removes the noise without adding too much **lag**:
 
 ```compare
-| Moving Average (`N`-tap Boxcar) | Exponential Moving Average (`EMA`) | Median-of-3 + `EMA` Cascade | 1D / Multi-State Kalman Filter
-RAM required | `N` samples ring buffer | **1 float (`y_prev`)** | 3-sample window + 1 float | State vector `x` + covariance `P`
-CPU cost per sample | Low (add new, subtract oldest) | **Minimal (1 multiply-accumulate)** | 3 comparisons + 1 multiply | Matrix multiply & divide
-Rejects single-sample spikes | Poor (smears spike across `N` steps) | Poor (step jumps by `α × spike`) | **100% (drops 1-sample outliers)** | Good (weights by measurement noise `R`)
-Frequency roll-off | Sinc lobes (poor stopband) | Smooth `-20 dB/decade` first-order | Rejects glitches + smooth roll-off | Optimal minimum mean-square error
+| Moving average | Exponential (EMA) | Median of 3, then EMA | Kalman filter
+RAM | A ring of N samples | **One value** | 3 samples and one value | A state and its covariance
+Cost per sample | Add one, subtract one | **One multiply-add** | 3 compares, one multiply | Matrix arithmetic
+Single spikes | Smeared over N samples | Leaks through, scaled by α | **Removed** | Weighted by noise
+Roll-off | Sinc lobes: poor | Smooth, first order | Spikes gone, then smooth | Optimal for its model
 ```
 
-```lcd cols=1
-// 1. Median-of-3 kills single-sample EMI / I2C glitches:
-float clean = median3(s[0], s[1], s[2]);
-
-// 2. Exponential Moving Average (alpha = 0.0..1.0):
-filtered += alpha * (clean - filtered);
--- 4 lines of C remove both impulse spikes and Gaussian hiss
+```c
+float clean = median3(s[0], s[1], s[2]);   /* drops one-sample glitches */
+filtered += alpha * (clean - filtered);    /* EMA, 0 < alpha <= 1     */
 ```
 
-## 5. Practical tuning workflow
-
-Tune a new physical plant safely in four incremental steps:
+## 6. Tuning, in order
 
 ```steps
-1. Verify filter & direction | Zero all gains (`Kp = Ki = Kd = 0`). Plot raw vs filtered sensor data and verify that increasing actuator command moves the sensor in the expected direction
-2. Tune Proportional (Kp) | Set `Ki = 0, Kd = 0`. Increase `Kp` on small step changes until the system responds briskly with a slight, damped 10% overshoot | blue
-3. Add Derivative damping (Kd) | If inertia causes overshoot, increase `Kd` (with low-pass filtering on the measurement) to brake the approach to the setpoint | amber
-4. Add Integral (Ki) & clamp | Increase `Ki` slowly until steady-state droop disappears, then test a large step to verify anti-windup clamping prevents saturation overshoot | green
+Check direction and noise | All gains zero. Plot raw and filtered readings; check that more output moves the reading the right way
+Proportional | Ki and Kd zero. Raise Kp on small steps until the response is brisk, with about 10 % overshoot | blue
+Derivative | If inertia overshoots, add Kd, on the filtered measurement | amber
+Integral | Raise Ki slowly until the droop goes; then try a large step to check the anti-windup | green
 ```
 
-## 6. Control loop sign-off checklist {style=card colour=blue}
+## 7. Sign-off checklist {style=card colour=blue}
 
 ```checklist
-[x] Control loop executes at a deterministic hardware timer rate (`10x` faster than the plant's dominant time constant)
-[x] Integral accumulator is clamped (`anti-windup`) whenever the actuator hits its physical 0% or 100% limit
-[x] Derivative term is computed on the **filtered measurement** (`-Kd × d(meas)/dt`), never on raw unsmoothed error
-[x] Manual-to-automatic mode transitions initialise `i_sum = current_output` for **bumpless transfer**
-[x] Sensor disconnection or out-of-range reading immediately trips a safe actuator shutdown state (`0% PWM`)
+[x] The loop runs from a hardware timer, at least ten times faster than the plant's main time constant
+[x] The integral is clamped whenever the actuator is at 0 or 100 %
+[x] The derivative uses the filtered measurement, never the raw error
+[x] Switching from manual to automatic sets the integral to the current output: a bumpless transfer
+[x] A disconnected or impossible reading switches the actuator safely off
 ```
 
-## 7. Acronym guide: every term defined {.wide}
+## 8. Glossary
 
-```cards cols=4 style=label
-PID | Proportional-Integral-Derivative: closed-loop feedback controller combining present error, past accumulation and rate of change
-EMA & IIR | Exponential Moving Average and Infinite Impulse Response: recursive digital filters using minimal memory
-FIR | Finite Impulse Response: digital filter (such as a moving average) whose output depends only on the last N inputs
-ADC & DAC | Analogue-to-Digital Converter (measures physical voltage) and Digital-to-Analogue Converter (drives voltage output)
-PWM | Pulse-Width Modulation: switches a digital pin rapidly at variable duty cycle (0% to 100%) to control average power
-EMI | Electromagnetic Interference: electrical noise from motors or radios that causes single-sample sensor spikes
-LTI | Linear Time-Invariant: mathematical system class where superposition holds and PID stability can be proven
-DSP & FPU | Digital Signal Processing and Floating-Point Unit: hardware extensions that execute filter maths in single cycles
+```glossary cols=1
+EMA | Exponential moving average
+FIR, IIR | Finite and infinite impulse response filters
+PID | Proportional-integral-derivative
+PWM | Pulse-width modulation
+Setpoint | The value the loop is asked to hold
+Windup | An integral that grows while the output cannot respond
 ```
 
 ## In short {.summary}
 
-Run your control loop on a fixed hardware timer and strip single-sample glitches with a **median-of-3 + EMA filter**. Compute **Derivative on measurement**, and **clamp the Integral sum** whenever the actuator saturates.
+Run the loop from a hardware timer, remove glitches with a median and an EMA, take the derivative of the measurement, and clamp the integral when the actuator saturates.
 
-### Filter glitches before `Kd`
+### Filter before Kd
 
-A single noisy ADC bit multiplied by `Kd / dt` slams the actuator; a 3-sample median plus EMA costs four lines of code.
+One noisy bit times Kd/Δt slams the actuator. A median and an EMA cost two lines.
 
-### Always clamp the integral
+### Clamp the integral
 
-Without anti-windup, holding a motor stalled for five seconds winds the integral so high that it overshoots wildly on release.
+Hold a stalled motor for five seconds without anti-windup, and it overshoots wildly when released.
 
-### Sample at a rock-solid `dt`
+### Keep Δt steady
 
-Trigger the ADC conversion from a hardware timer so sample jitter never masquerades as derivative rate of change.
+Trigger the ADC from a timer, so jitter never looks like a rate of change.

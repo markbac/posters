@@ -1,123 +1,164 @@
 ---
-title: "Cosmology and the Expanding Universe: Big Bang to Dark Energy"
-subtitle: Cosmic inflation, the Cosmic Microwave Background, Hubble expansion, dark matter and the fate of the cosmos
-byline: Popular Astrophysics, Observational Cosmology & Particle Physics Explainer
+title: "Cosmology and the Expanding Universe"
+subtitle: From inflation and the first light to dark matter, dark energy and the Hubble tension
+byline: Popular astrophysics explainer
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-040
-version: "1.0"
 colours:
   accent: "#0284c7"
   secondary: "#0369a1"
 footer:
-  left: Cosmology & Expanding Universe Explainer
+  left: Cosmology and the Big Bang
   centre: Popular Astrophysics Reference
-  right: Big Bang Timeline, CMB, Redshift, Dark Matter & Dark Energy Guide
   qr: https://en.wikipedia.org/wiki/Lambda-CDM_model
-  qr-label: Standard Model of Cosmology
+  qr-label: The ΛCDM model
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 13.8 B yrs | Age of the universe since the hot Big Bang (measured via Planck satellite data) | ±20 million yrs | good |
-| 2.725 K | Temperature of the Cosmic Microwave Background (CMB) radiation today | cooled from 3,000 K | good |
-| 95% Dark | Share of the universe made of Dark Energy (68%) and Dark Matter (27%) | only 5% atoms! | bad |
-| 93 B ly | Diameter of the observable universe (stretched by space expansion!) | 46.5 B ly radius | good |
+| Value | Label |
+|---|---|
+| 13.8 billion years | Age of the universe, from the Planck satellite |
+| 2.725 K | Temperature of the cosmic microwave background today |
+| 95 % | Of the universe that is dark energy and dark matter |
+| 93 billion light-years | Across the observable universe |
 
 ## Introduction {.abstract}
 
-The Big Bang was not an explosion of matter into an empty room; it was the rapid expansion of **space itself** **13.8 billion years ago**. As space stretched, the primeval plasma cooled enough for quarks to bind into protons (`3 minutes`) and electrons to lock onto nuclei at **Recombination (`380,000 years`)**. Over hundreds of millions of years, **Dark Matter** halos pulled gas together into the first stars and galaxies. Today, astronomers use the **Lambda-Cold Dark Matter (`ΛCDM`)** model to track how **Dark Energy** accelerates cosmic expansion.
+The Big Bang was not an explosion into empty space: it was the expansion of **space itself**, from a hot dense state 13.8 billion years ago. As space stretched, the plasma cooled. Protons formed, then the first nuclei, then atoms, and the light of that moment is still arriving as the **cosmic microwave background**. The **Lambda-Cold Dark Matter (ΛCDM)** model describes all of it with six numbers.
 
-## 1. Timeline of the universe: from `10⁻³⁶` seconds to today {.wide}
+## 1. The history of the universe, on a log scale {.wide}
 
-```mermaid
-flowchart LR
-  Inf["1. Cosmic Inflation (10^-36 s)\nSpace expands exponentially;\nQuantum fluctuations stretch into\nseeds of future galaxy clusters"] --> BBN["2. Big Bang Nucleosynthesis (3 min)\nUniverse cools to 10^9 K;\nProtons & neutrons fuse into\n75% Hydrogen, 25% Helium-4"]
-  BBN --> CMB["3. Recombination / CMB (380,000 yr)\nPlasma cools to 3,000 K;\nElectrons bind to nuclei -> Fog clears!\nFirst light (CMB) travels freely"]
-  CMB --> Dark["4. Dark Ages & First Stars (100-400M yr)\nDark Matter halos pull gas in;\nPopulation III stars & quasars\nre-ionise the cosmos (JWST era)"]
-  Dark --> Now["5. Dark Energy Era (9B to 13.8B yr)\nSpace stretches so wide that\nDark Energy repulsion overtakes\ngravity -> Expansion accelerates!"]
+Each mark is ten times later than the one before it. Inflation grew space 10²⁶ times in a split second, and its quantum ripples became the seeds of galaxies. Protons formed at a microsecond, the first nuclei (75 % hydrogen, 25 % helium) by three minutes, and atoms at 380,000 years, which released the CMB. The first stars lit at about 200 million years, and dark energy took over at about 9.8 billion.
+
+```logscale unit=" s" width=2400
+1e-36 | Inflation | purple
+1e-6 | Protons form | blue
+180 | First nuclei | blue
+1.2e13 | Atoms form: the CMB | amber
+6e15 | First stars | amber
+3e17 | Dark energy dominates | red
+4.35e17 | Today | green
 ```
 
-[[CAPTION:Figure]] For the first `380,000 years`, the universe was an opaque glowing fog of free electrons and photons. The moment atoms formed, that light escaped as the **Cosmic Microwave Background (`CMB`)**.
+## 2. What the universe is made of
 
-## 2. What the universe is actually made of (`ΛCDM` energy budget)
+Every star, planet and person adds up to less than 5 % of it. Of the ordinary matter, most is thin gas between the galaxies: stars are one tenth of it.
 
-Every star, planet, nebula, tree and human being accounts for less than **5%** of the mass-energy density of the cosmos:
-
-```figure
-@segments
-title: Mass-energy composition of the universe today (Measured by Planck satellite CMB acoustic peaks & Type Ia supernovae)
-7 | Dark Energy (~68.3% — Uniform vacuum energy accelerating the expansion of space) | Repulsive | purple
-2 | Cold Dark Matter (~26.8% — Invisible gravitational scaffolding) | Halos | blue
-1 | Ordinary Baryonic Matter (~4.9% — 4.4% intergalactic gas, only 0.5% stars & planets!) | Atoms | green
+```vega-lite
+{
+  "data": {"values": [{"part": "Dark energy, 68 %", "n": 68}, {"part": "Dark matter, 27 %", "n": 27}, {"part": "Ordinary matter, 5 %", "n": 5}]},
+  "transform": [
+    {"window": [{"op": "sum", "field": "n", "as": "end"}]},
+    {"calculate": "datum.end - datum.n", "as": "start"},
+    {"calculate": "sequence(datum.start, datum.end)", "as": "cell"},
+    {"flatten": ["cell"]},
+    {"calculate": "datum.cell % 10", "as": "col"},
+    {"calculate": "floor(datum.cell / 10)", "as": "row"}
+  ],
+  "mark": {"type": "square", "size": 300},
+  "width": 240, "height": 240,
+  "encoding": {
+    "x": {"field": "col", "type": "ordinal", "axis": null},
+    "y": {"field": "row", "type": "ordinal", "axis": null, "sort": "descending"},
+    "color": {"field": "part", "type": "nominal", "title": null, "legend": {"orient": "bottom", "direction": "vertical", "labelLimit": 400, "labelFontSize": 14}, "sort": ["Dark energy, 68 %", "Dark matter, 27 %", "Ordinary matter, 5 %"]}
+  }
+}
 ```
 
-```compare
-| Ordinary Baryonic Matter (`4.9%`) | Cold Dark Matter (`26.8%`) | Dark Energy (`Λ`, `68.3%`)
-What is it? | Protons, neutrons and electrons (the entire Periodic Table of elements) | Non-baryonic particles that **do not absorb, reflect or emit light** | Intrinsic energy density of empty space (**Cosmological Constant `Λ`**)
-How it interacts | Gravity + Electromagnetism + Strong & Weak nuclear forces | **Gravity only** (passes straight through ordinary rock and detectors) | Acts as a **smooth negative pressure** pushing space apart on mega-scales
-Observational proof | Visible stars, X-ray gas clouds, Big Bang deuterium abundance | **Flat galaxy rotation curves** (Vera Rubin), gravitational lensing, Bullet Cluster | **Distant Type Ia supernovae** are dimmer/further than a coasting universe predicts
-Effect on cosmos | Cools and collapses into stars, planets and living organisms | Built the gravitational "cosmic web" wells that pulled galaxies together | Causes cosmic expansion to **accelerate** over the last 5 billion years
+[[CAPTION:Figure]] The universe as 100 squares, from the Planck satellite and Type Ia supernovae.
+
+## 3. Expansion and redshift
+
+Galaxies recede with a speed in proportion to their distance, like raisins in rising dough: the dough is **space**, and every raisin moves away from every other.
+
+```equation
+title: The Hubble-Lemaître law, and redshift
+v = H_0 \, d \qquad 1 + z = \frac{a_{\text{now}}}{a_{\text{then}}}
+H_0 | The Hubble constant, the expansion rate today | km/s/Mpc
+z | Redshift: how far the light's wavelength has stretched |
+a | The scale factor: the size of space, relative to today |
 ```
 
-## 3. Cosmological redshift and the Hubble tension
+Light is stretched with the space it crosses. The same lines of hydrogen and sodium, from a galaxy at z = 0.1:
 
-Why are almost all galaxies moving away from us, with speed proportional to distance (**Hubble-Lemaître Law: `v = H₀ × d`**)? Because galaxies are like raisins baked into rising bread dough—as the dough (**space**) expands between them, every raisin moves away from every other raisin:
-
-```cards cols=1 style=top
-Cosmological Redshift (`z`) Is Not Just Doppler Motion | As a photon travels across billions of light-years of expanding space, the **wavelength of light stretches right along with space itself**: `1 + z = a_now / a_emitted`. The Cosmic Microwave Background emitted as visible orange light (`3,000 K`, wavelength `~1 µm`) has stretched by a factor of **`z ≈ 1,100`** into cold `2.725 K` microwaves (`wavelength ~1 mm`)! | blue
-The "Hubble Tension" (`67.4` vs `73.0 km/s/Mpc`) | Today's biggest mystery in cosmology: measuring the expansion rate **`H₀`** from the early universe (`Planck CMB`) gives **`67.4 km/s per Megaparsec`**, whereas measuring nearby galaxies using **Cepheid variables and Type Ia supernovae** (`SH0ES` / Hubble / Webb) gives **`73.0 km/s/Mpc`**—hinting at new physics! | amber
+```spectrum mode=absorption shift=0.1
+656.3 | Hα
+589 | Na D
+486.1 | Hβ
+434 | Hγ
 ```
 
-## 4. The cosmic distance ladder: how we measure the universe
+The CMB left at 3,000 K, glowing near-infrared. Stretched by z ≈ 1,100, it now peaks at about 1 mm.
 
-Astronomers cannot stretch a tape measure across space; they calibrate a chain of overlapping **distance rungs**:
+## 4. The Hubble tension
+
+Two ways of measuring $H_0$ disagree, by more than their errors allow. The early universe (the CMB) gives a slower expansion than nearby stars and supernovae do. Either one method has a hidden error, or ΛCDM is missing new physics.
+
+```gradient-scale from=64 to=76 unit=" km/s/Mpc" colours=blue,green,amber,red step=2
+67.4 | Planck, from the CMB
+69.8 | Tip of the red giant branch
+73.0 | SH0ES, Cepheids and supernovae
+```
+
+## 5. The cosmic distance ladder
+
+No tape reaches across space, so each rung calibrates the next:
 
 ```steps
-1. Radar & Stellar Parallax (`0 to 30,000 light-years`) | The **Gaia** space telescope measures the tiny apparent shift (`arcseconds`) of nearby stars against the background as Earth orbits from January to July (`1 Parsec = 3.26 light-years`) | green
-2. Cepheid Variable Stars (`up to 100 Million light-years`) | **Henrietta Swan Leavitt** discovered that pulsating Cepheid stars brighten and dim on a clockwork period directly tied to their true luminosity—comparing true brightness to apparent brightness (`1 / d²`) reveals exact distance! | blue
-3. Type Ia Supernovae (`up to 10+ Billion light-years`) | Because White Dwarfs always explode at the exact same **`1.44 M☉` Chandrasekhar mass limit**, they detonate with a uniform peak brightness (`M ≈ -19.3`) visible halfway across the observable universe | amber
-4. Cosmological Redshift (`z = 1 to 14+`) | For the most distant infant galaxies seen by the **James Webb Space Telescope (`JWST`)**, spectroscopic redshift `z` directly maps distance and lookback time | purple
+Parallax | Gaia measures the yearly shift of nearby stars against distant ones: thousands of light-years | green
+Cepheid variables | Henrietta Leavitt found that their period gives their true brightness: 100 million light-years | blue
+Type Ia supernovae | Exploding white dwarfs near 1.4 solar masses all peak near the same brightness: billions of light-years | amber
+Redshift | For the most distant galaxies, with ΛCDM: to z = 14 and beyond, seen by JWST | purple
 ```
 
-## 5. How we know the Big Bang happened {style=card colour=blue}
+## 6. The three ingredients {.wide}
+
+```compare
+| Ordinary matter (5 %) | Cold dark matter (27 %) | Dark energy (68 %)
+What it is | Protons, neutrons and electrons: every element | Particles that neither emit nor absorb light | The energy of empty space itself, the cosmological constant Λ
+How it acts | Every force: gravity, electromagnetism, the nuclear forces | **Gravity only**: it passes through rock and detectors | A smooth **negative pressure** that pushes space apart
+The evidence | Stars, X-ray gas, the deuterium made in the first minutes | **Flat galaxy rotation curves**, gravitational lensing, the Bullet Cluster | **Distant Type Ia supernovae** are fainter than a coasting universe allows
+What it does | Collapses into stars, planets and life | Built the cosmic web that gathered the galaxies | **Accelerates** the expansion, for the last 5 billion years
+```
+
+## 7. How we know the Big Bang happened {cols=2 style=card colour=blue}
 
 ```checklist
-[x] **1. Hubble Expansion (`1929`)**: Galaxies in every direction exhibit redshift proportional to distance, showing space was smaller in the past
-[x] **2. Cosmic Microwave Background (`1965`)**: Arno Penzias and Robert Wilson detected the uniform `2.725 K` thermal afterglow predicted by George Gamow and Ralph Alpher
-[x] **3. Primordial Element Abundances (`BBN`)**: The universe's oldest pristine gas clouds contain `~75% ¹H`, `~25% ⁴He` and trace Lithium-7—matching 3-minute Big Bang fusion maths to four decimal places
-[x] **4. Baryon Acoustic Oscillations (`BAO`)**: Sound waves frozen into the `CMB` at `380,000 years` appear today as a characteristic `~490-million-light-year` spacing between galaxy clusters
+[x] **Expansion (1929)**: galaxies in every direction are redshifted in proportion to their distance
+[x] **The CMB (1965)**: Penzias and Wilson found the 2.7 K afterglow that Alpher and Herman had predicted
+[x] **The lightest elements**: the oldest gas is 75 % hydrogen and 25 % helium by mass, as three minutes of fusion predict, to about 1 % (lithium-7 is the known mismatch)
+[x] **Baryon acoustic oscillations**: sound waves frozen in the CMB set a spacing of 490 million light-years between galaxies today
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 8. Glossary
 
-```cards cols=4 style=label
-ΛCDM | Lambda-Cold Dark Matter: the standard mathematical model of cosmology (`Λ` = Dark Energy, `CDM` = Cold Dark Matter)
-CMB & BBN | Cosmic Microwave Background (`2.725 K` relic light from 380,000 yr) and Big Bang Nucleosynthesis (first 3-minute H/He fusion)
-H₀ & Mpc | Hubble Constant (`~67–73 km/s/Mpc` expansion rate) and Megaparsec (`3.26 million light-years`, the unit of intergalactic distance)
-Redshift (z) | Fractional stretching of a photon's wavelength (`Δλ / λ₀`) caused by the expansion of space during its journey to Earth
-BAO | Baryon Acoustic Oscillations: frozen sound-wave ripples from the early plasma that serve as a "standard ruler" across cosmic time
-WIMP & Axion | Weakly Interacting Massive Particle and Axion: leading theoretical particle physics candidates for Cold Dark Matter
-JWST & Planck | James Webb Space Telescope (infrared early-galaxy observatory) and European Space Agency Planck `CMB` mission
-ly, AU & pc | Light-year (`9.46 trillion km`), Astronomical Unit (`150M km` Earth-Sun distance) and Parsec (`3.26 light-years`)
+```glossary cols=2
+BAO | Baryon acoustic oscillations, a standard ruler
+BBN | Big Bang nucleosynthesis, the first three minutes of fusion
+CMB | Cosmic microwave background
+H₀ | Hubble constant, the expansion rate today
+Mpc | Megaparsec: 3.26 million light-years
+ΛCDM | Lambda-Cold Dark Matter, the standard model of cosmology
+JWST | James Webb Space Telescope
+z | Redshift
 ```
 
 ## In short {.summary}
 
-Our universe began **13.8 billion years ago** in a hot, dense state and has been expanding and cooling ever since. **Cold Dark Matter (`27%`)** provided the gravitational scaffolding that assembled galaxies, **ordinary atoms (`5%`)** lit up the stars, and **Dark Energy (`68%`)** is now accelerating the expansion of space itself.
+The universe began 13.8 billion years ago, hot and dense, and has been expanding and cooling ever since. Dark matter built its structure, atoms lit its stars, and dark energy now speeds its expansion.
 
-### Looking far is looking back in time
+### To look far is to look back
 
-Because light travels at a finite speed (`300,000 km/s`), viewing a galaxy `13 billion light-years` away shows it as an infant just `800 million years` after the Big Bang.
+A galaxy 13 billion light-years away is seen as it was 800 million years after the Big Bang.
 
-### Why the observable universe is 93 billion light-years wide
+### Why 93 billion light-years
 
-Even though the universe is `13.8 billion years` old, space kept stretching while light travelled towards us—placing the emitters of that ancient light `46.5 billion light-years` away today.
+Space kept stretching while the oldest light travelled, so its sources are now 46 billion light-years away.
 
 ### Dark matter built our galaxy
 
-Without Dark Matter's extra gravity pulling gas together early on, ordinary matter after the Big Bang was too sparse and warm to collapse into galaxies like ours.
+Without its extra gravity, the thin, warm gas after the Big Bang could not have collapsed into galaxies.

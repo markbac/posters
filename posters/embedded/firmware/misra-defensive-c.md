@@ -1,154 +1,141 @@
 ---
 title: "Defensive Embedded C and Safety Guidelines"
-subtitle: Eliminating undefined behaviour, memory corruption and concurrency traps in safety-critical firmware
-byline: Safety-Critical Firmware Engineering & Static Analysis Explainer
+subtitle: Removing undefined behaviour, memory corruption and concurrency traps from safety-critical firmware
+byline: Embedded firmware engineering
 orientation: portrait
 columns: 2
 paper: a1
 width: 1200
 document_number: PO-025
-version: "1.0"
 colours:
   accent: "#b91c1c"
   secondary: "#991b1b"
 footer:
-  left: Defensive C & MISRA Explainer
-  centre: Safety-Critical Firmware Reference
-  right: Undefined Behaviour, MISRA C & Static Analysis Guide
+  left: Defensive Embedded C
+  centre: Embedded Engineering Reference
   qr: https://misra.org.uk/
-  qr-label: MISRA C Guidelines
+  qr-label: MISRA
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 0 bytes | Dynamic heap (`malloc`) allowed after startup in safety-critical loops | zero fragmentation | good |
-| 100% | Loops that must have a provable upper iteration bound (`Power of 10`) | no infinite hangs | good |
-| Undefined | Compiler behaviour on signed integer overflow or null dereference (`UB`) | silent bugs | bad |
-| 3 layers | Compiler flags (`-Wall -Wextra -Werror`), Static Analysis and Sanitizers | automated gate | good |
+| Value | Label |
+|---|---|
+| 0 | Heap allocations after start-up |
+| Every loop | Has a provable upper bound, by the Power of 10 |
+| Undefined | What C does on signed overflow or a null dereference |
+| 3 gates | Strict warnings, static analysis and sanitizers, on every commit |
 
 ## Introduction {.abstract}
 
-The C language gives firmware direct access to hardware registers with zero runtime overhead, but it also contains dozens of **Undefined Behaviour (UB)** traps. When code triggers Undefined Behaviour—such as overflowing a signed integer or violating strict aliasing—the optimising compiler can delete safety checks silently. Originating in the **Motor Industry Software Reliability Association (MISRA)** guidelines and spaceflight's **Power of 10**, defensive C restricts the language to a safe subset verified on every commit.
+C gives firmware direct access to hardware at no cost, but it holds dozens of **undefined behaviour (UB)** traps. Trigger one, such as a signed overflow or a strict-aliasing violation, and the optimiser may silently delete your safety checks. **MISRA C**, from the motor industry, and NASA JPL's **Power of 10** restrict C to a safe subset, checked on every commit.
 
-## 1. Six classic undefined behaviour and hardware traps {.wide}
-
-Compare fragile everyday C with the defensive pattern required in high-reliability firmware:
+## 1. Six classic traps {.wide}
 
 ```cards cols=3 style=top
-1. Missing `volatile` on Hardware / ISR | Without `volatile`, the compiler caches a status register or Interrupt Service Routine (`ISR`) flag in a CPU register and loops forever | red
-2. Implicit Integer Promotion | In C, `uint8_t` and `uint16_t` promote to signed `int` before arithmetic; shifting `1 << 31` on a 32-bit signed `int` is Undefined Behaviour (`use 1UL << 31U`) | amber
-3. Unbounded Dynamic Heap (`malloc`) | Repeated `malloc()` and `free()` calls fragment small microcontroller Static Random-Access Memory (`SRAM`) until an allocation returns `NULL` after weeks in the field | red
-4. Unbounded Loops Polling Hardware | `while (!(SPI1->SR & RXNE));` hangs the entire system forever if a sensor wire breaks; every hardware wait loop must have a decrementing timeout counter | amber
-5. Pointer Type-Punning (`Strict Aliasing`) | Casting `float f; uint32_t u = *(uint32_t*)&f;` violates C strict aliasing rules and miscompiles under `-O2`; always use `memcpy(&u, &f, sizeof(u))` | blue
-6. Non-Atomic Multi-Word Shared State | Reading a 64-bit timestamp or struct shared with an `ISR` without a critical section reads half old bytes and half new bytes (**torn read**) | navy
+No volatile | Without `volatile`, the compiler keeps a status register or interrupt flag in a CPU register, and the loop never sees it change | red
+Integer promotion | `uint8_t` and `uint16_t` become signed `int` before arithmetic. `1 << 31` on a 32-bit `int` is UB: write `1UL << 31U` | amber
+Heap | `malloc()` and `free()` fragment a small SRAM until, weeks into the field, an allocation returns NULL | red
+Unbounded waits | `while (!(SPI1->SR & RXNE));` hangs for ever when a sensor wire breaks | amber
+Type punning | `*(uint32_t *)&f` breaks strict aliasing and miscompiles at -O2. Use `memcpy(&u, &f, sizeof u)` | blue
+Torn reads | Reading a 64-bit timestamp shared with an interrupt, without a critical section, can return half old and half new bytes | navy
 ```
 
-## 2. Side-by-side code fixes: buggy C vs defensive C
+## 2. A wait, made safe {.wide}
 
-```lcd cols=2
-// BUGGY C (Hangs on hardware fault, UB shift, torn read):
-uint32_t status_flags; // Shared with ISR (missing volatile!)
-
-void wait_sensor_ready(int bit) {
-  while (!(REG_STATUS & (1 << bit))) {
-    // Hangs forever if sensor disconnects!
-    // Also: (1 << 31) is signed overflow UB!
-  }
+```code-compare
+@bad Hangs, and has undefined behaviour
+uint32_t status_flags;               <1>
+void wait_ready(int bit) {
+  while (!(REG_STATUS & (1 << bit))) { }   <2>
 }
--- Compiles without warnings under default flags, fails in field!
-
-// DEFENSIVE C (Bounded timeout, unsigned U suffix, explicit status):
+@good Bounded, unsigned and checked
 volatile uint32_t g_status_flags;
-
-Err_t wait_sensor_ready(uint8_t bit, uint32_t max_polls) {
+err_t wait_ready(uint8_t bit, uint32_t max_polls) {
   if (bit >= 32U) { return ERR_INVALID_ARG; }
-  uint32_t mask = (1UL << bit);
+  uint32_t mask = 1UL << bit;
   while (((REG_STATUS & mask) == 0U) && (max_polls > 0U)) {
     max_polls--;
   }
-  return (max_polls > 0U) ? ERR_OK : ERR_TIMEOUT;
+  return (max_polls > 0U) ? ERR_OK : ERR_TIMEOUT;   <3>
 }
--- Deterministic upper bound; every error path handled explicitly
+-- 1 | Shared with an interrupt, but not volatile
+-- 2 | Never returns if the sensor is unplugged, and 1 << 31 overflows a signed int
+-- 3 | A fixed upper bound, and every outcome returned to the caller
 ```
 
-## 3. Core rules of defensive C {.wide}
-
-You do not need a 300-page manual to get 90% of the safety benefits. Enforce these six structural rules across your codebase:
+## 3. Six rules that give most of the benefit {.wide}
 
 ```compare
-| Standard C Habit | Defensive / `MISRA C` & `Power of 10` Requirement
-Memory allocation | `malloc()` / `free()` on demand | **Zero dynamic allocation after initialisation**; use fixed-size static pools or ring buffers in `.bss`
-Loop bounds | `while (condition)` until done | **Every loop must have a fixed, provable upper bound** (`max_iterations` guard) to prevent infinite hangs
-Function structure | `goto`, deep recursion, 500-line functions | **Zero recursion** (guarantees bounded call stack depth) and functions under `60 lines` with low cyclomatic complexity
-Type discipline | `int`, `long`, implicit sign conversions | Always use `<stdint.h>` exact-width types (`uint8_t`, `int32_t`) and suffix unsigned literals (`0x10U`)
-Return values & parameters | Ignore `printf` / driver return codes | **Check the return value of every non-void function** and validate pointer/range preconditions at function entry
-Preprocessor macros | Function-like `#define MAX(a,b)` with side effects | Replace function macros with type-safe **`static inline`** functions and `enum` / `const` constants
+| The habit | The defensive rule (MISRA C, Power of 10)
+Memory | `malloc()` and `free()` as needed | **No dynamic allocation after start-up**: static pools and ring buffers
+Loops | `while (condition)` until done | **Every loop has a fixed upper bound** that a tool can prove
+Functions | Recursion, `goto`, 500-line functions | **No recursion**, so stack depth is bounded, and functions under 60 lines
+Types | `int`, `long`, silent sign conversion | `<stdint.h>` exact-width types, and unsigned literals such as `0x10U`
+Errors | Return codes ignored | **Check every return value**; check pointers and ranges on entry
+Macros | `#define MAX(a, b)` with side effects | `static inline` functions, `enum` and `const`
 ```
 
-## 4. Automated verification pipeline in CI
+## 4. Three gates in CI
 
-Human code reviewers miss subtle integer promotions and race conditions. Build a three-stage automated gate in **Continuous Integration (CI)**:
-
-```mermaid
-flowchart LR
-  Code["C Source Commit\n(stdint.h + static asserts)"] --> S1["1. Strict Compiler Gate\n-Wall -Wextra -Werror\n-Wconversion -Wshadow\n-Wundef -Wstack-usage=512"]
-  S1 --> S2["2. Static Analysis (SAST)\nclang-tidy / Cppcheck /\nPC-lint / Polyspace\n(MISRA C Rule Checks)"]
-  S2 --> S3["3. Dynamic Sanitizers\nHost Unit Tests compiled with\n-fsanitize=address,undefined\n(ASan + UBSan)"]
+```flow
+[Commit|navy] -> [Strict compiler: -Wall -Wextra -Werror -Wconversion|blue] -> [Static analysis: clang-tidy, Cppcheck, MISRA checker|purple] -> [Host tests with ASan and UBSan|green]
 ```
 
-[[CAPTION:Figure]] Running host unit tests with AddressSanitizer (`ASan`) and UndefinedBehaviorSanitizer (`UBSan`) catches out-of-bounds array accesses and signed overflows immediately.
+Hardware-free modules compiled on a PC with sanitizers fail at the first bad access:
 
-## 5. Compile-time assertions & stack bounding
+```terminal title="Host unit tests"
+$ cc -g -fsanitize=address,undefined ring.c test_ring.c -o test_ring
+$ ./test_ring
+ring.c:42:17: runtime error: left shift of 1 by 31 places cannot be represented in type 'int'
+-- UBSan names the file, line and the exact undefined operation
+```
 
-Catch layout and sizing mistakes at compile time before the binary ever touches hardware:
+## 5. Check it when it compiles
 
-```lcd cols=1
+```c
 #include <assert.h>
-// C11 compile-time assertion (zero runtime cost!):
-static_assert(sizeof(PacketHeader_t) == 12U, "Padding broke header!");
-static_assert((RING_BUF_SIZE & (RING_BUF_SIZE - 1U)) == 0U,
-              "Ring buffer size must be a power of 2!");
--- GCC/Clang flag -fstack-usage emits a .su file per compilation unit
--- so CI can fail the build if any function frame exceeds 256 bytes!
+
+/* C11: zero cost at run time */
+static_assert(sizeof(packet_header_t) == 12U, "Padding broke the header");
+static_assert((RING_SIZE & (RING_SIZE - 1U)) == 0U, "Ring size must be a power of 2");
 ```
 
-## 6. Defensive C code-review checklist {style=card colour=red}
+`-fstack-usage` writes a `.su` file for each source file, so CI can fail any function whose frame is too big.
+
+## 6. Code review checklist {style=card colour=red}
 
 ```checklist
-[x] Compile with `-Wall -Wextra -Werror -Wconversion -Wsign-conversion -Wshadow -WStrict-prototypes`
-[x] Zero calls to `malloc()`, `calloc()`, `realloc()`, `free()`, `strcpy()`, `sprintf()` or `atoi()` (use `snprintf` and `strtol`)
-[x] Zero recursive functions; maximum call-graph stack depth verified statically (`-fstack-usage` or `puncover`)
-[x] Every hardware register wait loop includes a timeout counter and returns an explicit error code on failure
-[x] Shared variables between `ISR` and main thread use `<stdatomic.h>` or disable interrupts briefly inside a critical section
+[x] Build with `-Wall -Wextra -Werror -Wconversion -Wsign-conversion -Wshadow -Wstrict-prototypes`
+[x] No `malloc`, `free`, `strcpy`, `sprintf` or `atoi`: use `snprintf` and `strtol`
+[x] No recursion, and the worst-case stack depth checked
+[x] Every wait on hardware has a timeout and returns an error
+[x] Data shared with interrupts uses `<stdatomic.h>` or a short critical section
 ```
 
-## 7. Acronym guide: every term defined {.wide}
+## 7. Glossary
 
-```cards cols=4 style=label
-MISRA | Motor Industry Software Reliability Association: authors of the MISRA C coding standard for safety-critical systems
-UB | Undefined Behaviour: C constructs for which the ISO C standard imposes no requirements (allowing compilers to break assumptions)
-SAST | Static Application Security Testing: automated tools that analyse source code for bugs without executing it
-ASan & UBSan | AddressSanitizer (catches out-of-bounds/use-after-free) and UndefinedBehaviorSanitizer (catches overflow/shift bugs)
-ISR & DMA | Interrupt Service Routine and Direct Memory Access: asynchronous contexts requiring `volatile` or atomic barriers
-JPL | Jet Propulsion Laboratory (NASA): origin of Gerard Holzmann's "Power of 10" rules for safety-critical C code
-SIL & ASIL | Safety Integrity Level (IEC 61508) and Automotive Safety Integrity Level (ISO 26262) functional safety ratings
-CI | Continuous Integration: automated server pipeline compiling and verifying every code commit
+```glossary cols=1
+ASan, UBSan | AddressSanitizer and UndefinedBehaviorSanitizer
+ASIL, SIL | Safety levels of ISO 26262 and IEC 61508
+JPL | NASA's Jet Propulsion Laboratory, home of the Power of 10
+MISRA | Motor Industry Software Reliability Association
+SAST | Static application security testing
+UB | Undefined behaviour: anything may happen
 ```
 
 ## In short {.summary}
 
-Ban post-startup **`malloc`** and **recursion**, bound every hardware wait loop with a **timeout**, use exact **`<stdint.h>`** types with `-Wconversion -Werror`, and run **static analysis + `ASan`/`UBSan`** on every commit.
+No heap after start-up and no recursion; a timeout on every wait; exact-width types with warnings as errors; and static analysis and sanitizers on every commit.
 
-### If it can hang, it will hang
+### If it can hang, it will
 
-A sensor wire will eventually vibrate loose in the field; a bounded timeout loop turns a total system lockup into a recoverable error log.
+A wire will shake loose in the field. A bounded loop turns a lock-up into a logged error.
 
-### Turn warnings into errors
+### Warnings are errors
 
-`-Wconversion` and `-Wshadow` catch 80% of sign-extension and variable-shadowing bugs at the moment you type `make`.
+`-Wconversion` and `-Wshadow` catch sign and shadowing bugs as you build.
 
-### Verify with `ASan` and `UBSan` on host
+### Sanitize on the host
 
-Compiling your hardware-independent C modules on Linux/Windows with `-fsanitize=address,undefined` catches off-by-one bugs in milliseconds.
+Run hardware-free code on a PC with ASan and UBSan, and off-by-one errors show in milliseconds.

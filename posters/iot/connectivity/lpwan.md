@@ -1,167 +1,161 @@
 ---
 title: "Low-Power Wide-Area Networks"
-subtitle: Comparing cellular and unlicensed long-range radio standards for battery devices
-byline: Wireless IoT Connectivity & Radio Engineering Explainer
+subtitle: Cellular and unlicensed long-range radio for battery devices compared
+byline: IoT connectivity
 orientation: portrait
 columns: 3
 paper: a1
 width: 1350
 document_number: PO-009
-version: "1.0"
 footer:
-  left: LPWAN Showdown Poster
-  centre: Wireless IoT Reference
-  right: 3GPP Cellular IoT & LoRa Alliance Guide
+  left: LPWAN
+  centre: IoT Engineering Reference
   qr: https://lora-alliance.org/
-  qr-label: LoRa & 3GPP Specs
+  qr-label: LoRa Alliance
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 10+ km | Rural range of Long Range Wide Area Network (LoRaWAN) | multi-km reach | good |
-| 164 dB | Maximum Coupling Loss (MCL) of Narrowband IoT (NB-IoT) | deepest indoor | good |
-| 1 Mbps | Peak rate of Long-Term Evolution for Machines (`LTE-M`) | mobility & voice | good |
-| 1% | Typical sub-gigahertz duty-cycle limit in unlicensed spectrum | air-time cap | bad |
+| Value | Label |
+|---|---|
+| 10 km and more | Rural range of LoRaWAN |
+| 164 dB | Link budget of NB-IoT: the deepest indoor reach |
+| 1 Mbps | Peak rate of LTE-M, with handover and voice |
+| 1 % | Duty-cycle limit in Europe's 868 MHz band |
 
 ## Introduction {.abstract}
 
-**Low-Power Wide-Area (LPWA)** radio technologies bridge the gap between short-range wireless and high-power cellular broadband. **Long Range Wide Area Network (LoRaWAN)** operates in unlicensed **Industrial, Scientific and Medical (ISM)** bands using chirp spread spectrum, letting anyone deploy private gateways without **Subscriber Identity Module (SIM)** fees. **Narrowband Internet of Things (NB-IoT)** and **Long-Term Evolution for Machines (`LTE-M`)** operate in licensed **3rd Generation Partnership Project (3GPP)** cellular spectrum. They use mobile operator towers for guaranteed quality of service.
+**Low-power wide-area (LPWA)** radios fill the gap between short-range wireless and cellular broadband. **LoRaWAN** uses chirp spread spectrum in unlicensed bands, so anyone can put up a gateway, with no SIM fees. **NB-IoT** and **LTE-M** use licensed 3GPP cellular spectrum and the operators' towers, with managed quality of service.
 
-## 1. Three radio architectures: unlicensed vs cellular
-
-Each technology serves a distinct slice of the range, bandwidth and deployment spectrum:
+## 1. Three radios
 
 ```cards cols=1 style=top
-LoRaWAN (Unlicensed ISM) | Chirp Spread Spectrum (CSS) in 868 MHz (Europe) or 915 MHz (North America); nodes broadcast to any nearby gateway, which forwards packets to a Network Server | green
-NB-IoT (Licensed 180 kHz) | Ultra-narrowband cellular carrier inside Long-Term Evolution (LTE) spectrum; maximises indoor penetration and sleep life for stationary sensors | navy
-LTE-M (Licensed 1.4 MHz) | Wider cellular IoT carrier supporting full tower handover, lower latency, higher throughput for firmware updates and Voice over LTE (VoLTE) | blue
+LoRaWAN, unlicensed | Chirp spread spectrum at 868 MHz (Europe) or 915 MHz (Americas). A node broadcasts; any gateway in range forwards to the network server | green
+NB-IoT, licensed 180 kHz | A narrow carrier inside LTE: the deepest indoor reach and longest sleep, for sensors that stay put | navy
+LTE-M, licensed 1.4 MHz | Wider: full handover, lower latency, room for firmware updates, and VoLTE | blue
 ```
 
-```mermaid
-flowchart TB
-  subgraph L ["LoRaWAN (Star-of-Stars)"]
-    LN["LoRa Node"] -- "868/915 MHz\nChirp" --> LG["Gateways"]
-    LG --> LNS["Network Server\n& App Server"]
-  end
-  subgraph C ["NB-IoT & LTE-M (Cellular)"]
-    CN["Cellular Modem\n(SIM / eSIM)"] -- "Licensed LTE\nBand (e.g. B20)" --> CB["Operator Base\nStation (eNodeB)"]
-    CB --> CC["Core Network\n& Cloud"]
-  end
+## 2. Link budget
+
+Maximum coupling loss: how much loss between node and tower the link survives. Each 6 dB doubles the range in free space.
+
+```gradient-scale from=140 to=166 unit=" dB" colours=red,amber,green step=4
+142 | LTE, and LoRa SF7
+156 | LTE-M
+157 | LoRa SF12
+164 | NB-IoT
 ```
 
-[[CAPTION:Figure]] Any gateway in range receives LoRaWAN packets; cellular nodes attach to a licensed operator tower.
+NB-IoT gets there by repetition: a downlink can be sent up to 2,048 times.
 
-## 2. Modulation, spreading factors and link budget
+## 3. LoRa spreading factors
 
-**LoRaWAN** trades data rate for sensitivity using **Spreading Factors (`SF7` to `SF12`)** managed by **Adaptive Data Rate (ADR)**. **NB-IoT** achieves its 164 dB link budget by repeating transmissions up to 2,048 times:
+The **spreading factor** trades rate for sensitivity; **adaptive data rate (ADR)** picks it per node.
 
-```chart type=bar title="Maximum Coupling Loss (MCL) link budget (dB)" unit=" dB" max=170
-Standard 4G LTE | 142
-LoRaWAN SF7 (Fast) | 142
-LoRaWAN SF12 (Slow) | 157
-LTE-M (Cat-M1) | 156
-NB-IoT (Cat-NB2) | 164
-```
-
-| LoRa Spreading Factor | Bit rate (`125 kHz`) | Time on air (`50 B`) | Max payload (`EU868`) |
+| Spreading factor | Bit rate at 125 kHz | Air time, 50 B | Largest payload (EU868) |
 |---|---|---|---|
-| `SF7` (nearest gateway) | `5,470 bps` | ~100 ms | `222 bytes` |
-| `SF9` (medium range) | `1,760 bps` | ~350 ms | `115 bytes` |
-| `SF12` (deepest edge) | `250 bps` | ~2,460 ms | `51 bytes` |
+| SF7, near a gateway | 5,470 bps | About 100 ms | 222 B |
+| SF9 | 1,760 bps | About 330 ms | 115 B |
+| SF12, at the edge | 250 bps | About 2.3 s | 51 B |
 
 > [!WARNING]
-> In Europe (`868 MHz`), unlicensed transmitters must obey a **1% duty-cycle limit** (36 seconds of air time per hour). A node stuck at `SF12` takes over 2 seconds per packet, severely limiting how often it can send.
+> At 868 MHz a node may transmit **1 %** of the time: 36 s an hour. At SF12 that is about 15 messages.
 
-## 3. Sleep and downlink listening modes
+## 4. Trade-offs, side by side {.wide}
 
-How a server reaches a sleeping device depends on the device's listening class or timer mode:
-
-```figure
-@lanes
-LoRaWAN Class A | *Uplink Tx | *Rx1 (1 s) | *Rx2 (2 s) | Deep sleep until next uplink (lowest power)
-LoRaWAN Class B | *Beacon sync | *Ping slot | *Ping slot | Scheduled downlink windows
-LoRaWAN Class C | *Continuous Rx | *Uplink Tx | *Continuous Rx | Mains-powered actuators (zero downlink latency)
-Cellular PSM / eDRX | *Uplink Tx | *T3324 Idle | Deep sleep in Power Saving Mode (PSM) | *Wake on T3412
+```plot type=parallel width=1100 height=260 title="Typical values"
+| Range km | Battery years | Bit rate kbps | Peak current mA
+LoRaWAN | 12 | 9 | 5 | 40
+NB-IoT | 15 | 10 | 60 | 220
+LTE-M | 11 | 7 | 1000 | 350
 ```
-
-```lcd cols=1
-AT+JOIN=1:0:10:8
-+EVT:JOINED (OTAA DevAddr 260B1F42)
-AT+SEND=2:1:A41580 (ADR: SF7, 14 dBm)
--- LoRaWAN Over-The-Air Activation (OTAA)
-
-AT+COPS? -> +COPS: 0,2,"23415",9
-RSRP: -98 dBm, CE Level 1, PSM Active
--- NB-IoT operator attach (3GPP Release 14)
-```
-
-## 4. Head-to-head comparison across all three standards {.wide}
 
 ```compare
-| LoRaWAN (Class A/B/C) | NB-IoT (Cat-NB2) | `LTE-M` (Cat-M1)
-Spectrum & licensing | Unlicensed ISM (`868` / `915 MHz`), free | Licensed cellular (`700–2100 MHz`), SIM | Licensed cellular (`700–2100 MHz`), SIM
-Network ownership | Private gateways or public community/operator | Mobile network operators only | Mobile network operators only
-Channel bandwidth | `125 kHz` to `500 kHz` | `180 kHz` | `1.4 MHz`
-Data rate | `0.3 kbps` to `27 kbps` | `26 kbps` to `159 kbps` | `300 kbps` to `1 Mbps`
-Typical packet size | `11` to `222 bytes` (SF-dependent) | `20` to `1,500 bytes` | Unlimited IP streams & large FOTA
-Duty-cycle restriction | **1% in EU868** (or dwell time in US915) | None (managed by base station scheduler) | None (managed by base station scheduler)
-Mobility & handover | Works while moving (broadcast to all gateways) | Stationary (cell reselection only) | Full seamless cell handover at highway speed
-Peak transmit current | **~35 to 110 mA** (at +14 to +20 dBm) | `70` to `220 mA` (at +23 dBm) | `150` to `350 mA` (at +23 dBm)
+| LoRaWAN (Class A, B, C) | NB-IoT (Cat-NB2) | LTE-M (Cat-M1)
+Spectrum | Unlicensed 868 or 915 MHz: free | Licensed, 700 to 2100 MHz: SIM | Licensed, 700 to 2100 MHz: SIM
+Who runs it | You, a community, or an operator | Mobile operators | Mobile operators
+Bandwidth | 125 to 500 kHz | 180 kHz | 1.4 MHz
+Data rate | 0.3 to 27 kbps | 26 to 159 kbps | 300 kbps to 1 Mbps
+Packet size | 11 to 222 B | 20 to 1,500 B | IP streams, large updates
+Duty cycle | **1 % in EU868** | Scheduled by the network | Scheduled by the network
+Moving | Works: every gateway hears it | Stationary: reselection only | **Full handover**, at motorway speed
+Peak transmit current | **35 to 110 mA** | 70 to 220 mA | 150 to 350 mA
 ```
 
-## 5. Selecting the right LPWA technology {cols=2}
+## 5. How a sleeping node is reached {.wide}
 
-Follow three questions to choose between unlicensed LoRaWAN and cellular IoT:
-
-```flow
-[Private site, farm or campus with no SIM fees?|navy] -yes, <100 B/hr-> [Choose LoRaWAN|green]
-[Public nationwide coverage, deep basements, >100 B/day?|navy] -stationary-> [Choose NB-IoT|navy]
-[Moving vehicles, voice or frequent megabyte firmware updates?|amber] -yes-> [Choose LTE-M|blue]
+```lanes
+LoRaWAN Class A | *Send | *Rx1, 1 s | *Rx2, 2 s | Asleep until the next send
+LoRaWAN Class B | *Beacon | *Ping slot | *Ping slot | Downlink at set times
+LoRaWAN Class C | *Listening | *Send | *Listening | Mains powered: no delay
+Cellular PSM | *Send | *Idle, T3324 | Asleep in PSM | *Wake at T3412
 ```
 
-## 6. Deployment & radio engineering checklist {style=card colour=green}
+## 6. Joining
 
-Verify these five items before rolling out an LPWA sensor fleet:
+```terminal title="LoRaWAN, OTAA (AT commands vary by module)"
+> AT+JOIN=1:0:10:8
++EVT:JOINED
+> AT+SEND=2:A41580
++EVT:TX_DONE SF7 14dBm
+-- Over-the-air activation: fresh session keys on every join
+```
+
+```terminal title="NB-IoT, attaching"
+> AT+COPS?
++COPS: 0,2,"23415",9
+> AT+CEREG?
++CEREG: 0,1
+-- Operator 234-15, access technology 9: NB-IoT; registered on the home network
+```
+
+## 7. Which one
+
+```structogram
+if Private site, no SIM fees, under 100 B an hour?
+  LoRaWAN
+else
+  if Moving, voice, or large updates?
+    LTE-M
+  else
+    NB-IoT: deep indoor, stationary
+```
+
+## 8. Deployment checklist {style=card colour=green}
 
 ```checklist
-[x] LoRaWAN uses Over-The-Air Activation (OTAA) with unique root keys, never hardcoded Activation By Personalisation (ABP)
-[x] Adaptive Data Rate (ADR) enabled on stationary LoRaWAN nodes so close sensors step down to SF7 and save battery
-[x] Battery chemistry matched to peak current (coin cells struggle with 220 mA cellular bursts without a supercapacitor)
-[x] Payload packed in binary (CBOR or bitfields) so LoRaWAN frames fit inside SF12's 51-byte ceiling
-[x] Firmware Over The Air (FOTA) strategy tested (LoRaWAN multicast fragments vs NB-IoT/LTE-M CoAP blocks)
+[x] OTAA with unique root keys; never ABP with hard-coded keys
+[x] ADR on for stationary LoRaWAN nodes, so near ones drop to SF7
+[x] The battery suits the peak: coin cells need a capacitor for 220 mA cellular bursts
+[x] Binary payloads (CBOR or packed bits) that fit SF12's 51 bytes
+[x] Firmware updates tested: LoRaWAN multicast fragments, or CoAP blocks on cellular
 ```
 
-## 7. Acronym guide: every term defined {.wide}
+## 9. Glossary {.wide}
 
-```cards cols=4 style=label
-LPWA / LPWAN | Low-Power Wide-Area Network: wireless technologies built for multi-kilometre range on small batteries
-LoRa / LoRaWAN | Long Range physical layer (Chirp Spread Spectrum) and Long Range Wide Area Network MAC protocol
-NB-IoT & LTE-M | Narrowband Internet of Things (180 kHz) and Long-Term Evolution for Machines (1.4 MHz) 3GPP standards
-ISM | Industrial, Scientific and Medical: unlicensed sub-gigahertz radio bands (868 MHz in Europe, 915 MHz in Americas)
-CSS & SF | Chirp Spread Spectrum modulation and Spreading Factor (SF7 to SF12, trading data rate for range)
-ADR | Adaptive Data Rate: LoRaWAN mechanism that optimises each node's Spreading Factor and transmit power
-OTAA / ABP | Over-The-Air Activation (dynamic session keys) and Activation By Personalisation (static keys) in LoRaWAN
-MCL & CE | Maximum Coupling Loss (dB link budget) and Coverage Enhancement repetition levels in cellular IoT
-PSM & eDRX | Power Saving Mode (~3 µA deep sleep) and Extended Discontinuous Reception in NB-IoT and LTE-M
-SIM / eSIM | Subscriber Identity Module and embedded SIM chip used to authenticate on licensed cellular networks
-FOTA & CBOR | Firmware Over The Air updates and Concise Binary Object Representation compact payload format
-3GPP & VoLTE | 3rd Generation Partnership Project cellular standards body and Voice over Long-Term Evolution
+```glossary cols=4
+ADR | Adaptive data rate
+CE level | Coverage enhancement: how many repetitions
+CSS | Chirp spread spectrum
+eDRX, PSM | Extended discontinuous reception; power saving mode
+ISM | Unlicensed industrial, scientific and medical bands
+MCL | Maximum coupling loss
+OTAA, ABP | Over-the-air activation; activation by personalisation
+SF | Spreading factor, SF7 to SF12
 ```
 
 ## In short {.summary}
 
-Choose `LoRaWAN` when you want private gateways, zero recurring `SIM` costs and 40 mA transmit peaks; choose `NB-IoT` for nationwide carrier coverage deep underground; choose `LTE-M` for moving assets and heavy firmware updates.
+LoRaWAN for private gateways and no SIM costs; NB-IoT for national coverage deep indoors; LTE-M for things that move and large updates.
 
-### Own the network with LoRaWAN
+### Own the network
 
-One gateway on a roof covers a factory or farm in unlicensed spectrum with no monthly cellular subscription per sensor.
+One rooftop gateway covers a farm or factory, with no subscription per sensor.
 
-### Penetrate concrete with narrowband cellular
+### Reach the basement
 
-Licensed spectrum, 23 dBm transmit power and automatic repetitions reach basements where unlicensed radios cannot.
+Licensed spectrum, 23 dBm and repetition reach where unlicensed radios cannot.
 
-### Track moving assets with cellular handover
+### Follow the asset
 
-A 1.4 MHz channel and full tower handover let trackers cross countries while streaming megabyte firmware updates.
+LTE-M hands over between towers across countries.

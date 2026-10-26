@@ -1,138 +1,146 @@
 ---
 title: "Resilience and Distributed Systems Patterns"
-subtitle: Designing edge devices and cloud services that survive network outages, broker storms and partial failures
-byline: Distributed Systems & Edge-to-Cloud Architecture Explainer
+subtitle: Devices and services that survive outages, retry storms and partial failures
+byline: Software architecture
 orientation: portrait
 columns: 2
 paper: a1
 width: 1200
 document_number: PO-031
-version: "1.0"
 colours:
   accent: "#b45309"
   secondary: "#92400e"
 footer:
-  left: Resilience & Distributed Patterns Explainer
-  centre: Systems Architecture Reference
-  right: Backoff + Jitter, Circuit Breakers, Idempotency & Backpressure Guide
+  left: Resilience Patterns
+  centre: Software Architecture Reference
   qr: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
-  qr-label: "Builders Library — Retries & Jitter"
+  qr-label: Timeouts, retries and backoff with jitter
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 100,000x | Reconnect spike when a fleet retries on a fixed timer without **Jitter** | thundering herd | bad |
-| 3 states | **Circuit Breaker** state machine: `Closed`, `Open` and `Half-Open` | stops cascade | good |
-| 1 key | **Idempotency Key** (`UUID` or sequence number) making retries safe | exactly-once effect | good |
-| Bounded | Every queue, cache and retry loop must have a hard capacity ceiling | backpressure | good |
+| Value | Label |
+|---|---|
+| 10,000 at once | Devices reconnecting in the same second, without jitter |
+| 3 states | Of a circuit breaker: closed, open, half-open |
+| 1 key | Per request makes a retry safe: the idempotency key |
+| Bounded | Every queue, cache and retry loop |
 
 ## Introduction {.abstract}
 
-In a distributed system—whether 50,000 cellular sensors reporting to an ingestion broker or microservices calling databases—networks drop packets, certificates expire and downstream servers stall. Naive failure handling makes outages worse: immediate retry loops trigger **thundering-herd retry storms** that knock recovering servers straight back down, while unbounded queues exhaust **Random-Access Memory (RAM)**. Resilient architecture combines five patterns: **Timeouts**, **Exponential Backoff with Full Jitter**, **Idempotency Keys**, **Circuit Breakers** and **Bounded Store-and-Forward Backpressure**.
+Whether 50,000 sensors report to a broker or services call a database, networks drop packets, certificates expire and servers stall. Naive handling makes it worse: instant retries become **retry storms** that knock a recovering server down again, and unbounded queues run out of memory. Five patterns fix it: **timeouts**, **backoff with full jitter**, **idempotency keys**, **circuit breakers**, and **bounded store-and-forward**.
 
-## 1. Killing retry storms with backoff and jitter {.wide}
+## 1. One outage, its threats and barriers
 
-Suppose a cell tower or cloud broker reboots for 10 seconds while 10,000 devices maintain active sessions. If every device uses a fixed `5 s` retry or pure exponential backoff (`2 s, 4 s, 8 s`), all 10,000 devices slam the server in synchronised waves (**Thundering Herd**). Adding **random Full Jitter** spreads the load evenly across time:
-
-```figure
-@lanes
-Bad: Fixed / Synchronised Retry (2s, 4s, 8s) | *10,000 nodes hit at t=2s (Crash!) | *10,000 hit at t=4s (Crash!) | *10,000 hit at t=8s (Crash!) | Server never recovers!
-Good: Exponential Backoff + Full Jitter | *Nodes spread uniformly across 0..2s | *Remaining spread across 0..4s | *All nodes reconnected smoothly! | Zero traffic spikes
+```bowtie
+hazard: Fleet and broker
+top: Broker down
+threat: Retry storm | Jitter, Limits
+threat: Cert expiry | Alerts, Renewal
+threat: Poison message | DLQ
+consequence: Data lost | Flash buffer, Replay
+consequence: Battery drain | Breaker, Capped backoff
 ```
 
-```lcd cols=2
-// Formula for Cap-Bounded Exponential Backoff with Full Jitter:
-// sleep_ms = random_uniform(0, min(MAX_BACKOFF_MS, BASE_MS * (2 ^ attempt)))
+## 2. Backoff with full jitter
 
-uint32_t calc_backoff_jitter_ms(uint8_t attempt) {
-  uint8_t shift = (attempt > 10U) ? 10U : attempt;
-  uint32_t exp_cap = MIN(300000UL, 1000UL * (1UL << shift)); // Cap at 5 min
-  return trng_random_u32() % (exp_cap + 1UL); // Full jitter: 0..exp_cap!
-}
--- Always seed the random generator from a hardware TRNG or unique Device ID!
--- If every MCU boots with rand() seed = 1, they all pick the exact same jitter!
+If 10,000 devices retry at 2, 4 and 8 seconds, they hit the server in synchronised waves. Random **full jitter** spreads them evenly:
+
+```equation
+title: Capped exponential backoff, full jitter
+t_n = \mathrm{random}\left(0,\ \min(t_{\text{cap}},\ t_{\text{base}} \cdot 2^{n})\right)
+t_n | Wait before retry n | ms
+t_{\text{base}} | First wait, such as 1 s | ms
+t_{\text{cap}} | Longest wait, such as 5 minutes | ms
 ```
 
-## 2. The circuit breaker pattern
+```lanes
+Fixed or plain exponential | *All 10,000 at 2 s | *All at 4 s | *All at 8 s | The server never recovers
+Full jitter | *Spread over 0 to 2 s | *Spread over 0 to 4 s | *All back | No spikes
+```
 
-When a downstream service or external modem is failing, continuing to wait `30 seconds` on every request ties up threads and drains battery. A **Circuit Breaker** wraps the dependency in a three-state machine:
+> [!WARNING]
+> Seed the random generator from a hardware TRNG or the device ID. If every MCU boots with the same seed, they all pick the same "random" wait.
+
+## 3. The circuit breaker {cols=3}
+
+Waiting 30 seconds on a dead dependency for every request ties up threads and drains batteries. A breaker fails fast:
 
 ```mermaid
-flowchart LR
-  Closed["1. CLOSED (Normal)\nRequests pass through;\ncounts consecutive failures"] -->|"Failures >= Threshold\n(e.g. 5 timeouts in 30 s)"| Open["2. OPEN (Tripped!)\nFails fast immediately\n(0 ms wait / saves radio!)\nStarts cooldown timer"]
-  Open -->|"Cooldown Timer Expires\n(e.g. after 60 s)"| Half["3. HALF-OPEN (Probe)\nAllows 1 test request\nthrough to check health"]
-  Half -->|"Probe Succeeds"| Closed
-  Half -->|"Probe Fails"| Open
+stateDiagram-v2
+  direction LR
+  Closed --> Open : 5 failures in 30 s
+  Open --> HalfOpen : after 60 s
+  HalfOpen --> Closed : probe succeeds
+  HalfOpen --> Open : probe fails
 ```
 
-[[CAPTION:Figure]] When Open, the Circuit Breaker fails fast in microseconds and routes telemetry into local non-volatile flash storage until the cooldown expires.
+While open, calls fail in microseconds, and readings go to flash.
 
-## 3. Safe retries require Idempotency
+## 4. Retries need idempotency
 
-In any network, **at-least-once delivery** is the norm. If a client sends a command, the server executes it, and the acknowledgement (`ACK`) drops in transit, the client will retry. Without **Idempotency**, the server executes the action twice!
+Delivery is **at least once**: the server may act, then lose the acknowledgement, and the client retries.
 
-```cards cols=2 style=top
-Idempotent by Nature (`PUT` / `DELETE` / Absolute State) | Setting `target_valve_position = 40%` or `PUT /devices/42/config` can be repeated 10 times with the exact same result. Prefer absolute state over relative deltas (`adjust_valve(+10%)`)! | green
-Idempotent via Idempotency Key (`POST` / Commands) | Attach a deterministic **`Idempotency-Key` (`UUID` or `[DeviceID + MonotonicSeqNum]`)**. The server stores processed keys in an atomic table: if it sees key `seq=1042` again, it returns the cached success reply without re-running the side effect | amber
+```cards cols=1 style=top
+Idempotent by nature | Set absolute state: `valve = 40 %` or `PUT /devices/42/config` can be repeated with the same result. Avoid relative deltas such as `+10 %` | green
+Idempotent by key | Attach a key, such as a UUID or device ID with a sequence number. The server records keys it has processed, and replays its earlier answer instead of acting twice | amber
 ```
 
-## 4. Edge-to-cloud store-and-forward & backpressure {.wide}
+## 5. Store and forward
 
-What happens inside a sensor node or gateway when the internet connection drops for 48 hours?
+A flash ring buffer holds readings through an outage. The read pointer trails the write pointer; when full, routine logs overwrite the oldest, but a reserve for alarms is never overwritten.
+
+```ring cells=16
+fill: 0-4 | Acknowledged: free to reuse | green
+fill: 5-11 | Waiting to send | amber
+fill: 12-15 | Alarm reserve | red
+pointer: 5 | Read | navy
+pointer: 12 | Write | blue
+```
+
+## 6. Naive and resilient {.wide}
 
 ```compare
-| Naive Implementation | Resilient Architecture Pattern
-Downstream dependency hangs | Calls block without timeout; all worker threads freeze | **Explicit Deadline / Timeout** on every socket, bus and RPC call + **Bulkhead** thread pools
-Network offline for 24 hours | Drops readings or grows RAM queue until Out-Of-Memory (`OOM`) | **Bounded Circular Flash Ring Buffer (`Store-and-Forward`)** overwriting oldest low-priority logs
-Producer faster than consumer | Unbounded queue grows until crash | **Explicit Backpressure**: bounded queue blocks producer, drops low-priority telemetry or sheds load (`HTTP 429`)
-Poison pill / corrupt message | Crashes consumer, restarts, reads same message, crashes in loop! | **Dead-Letter Queue (`DLQ`)**: after `N` parse/process failures, quarantine message for inspection
+| Naive | Resilient
+A dependency hangs | Calls block for ever; every worker freezes | **A deadline on every call**, and bulkhead pools
+Offline for a day | Readings dropped, or memory grows until it runs out | **A bounded flash ring**, overwriting the oldest routine data
+Producer faster than consumer | The queue grows until the crash | **Backpressure**: block, shed low-priority data, or reply 429
+A poison message | Crash, restart, read it again, crash | **Dead-letter queue** after N failures
 ```
 
-```figure
-@segments
-title: Non-Volatile Flash Circular Ring Buffer (Store-and-Forward during cellular outage)
-3 | Committed & ACKed by Cloud (Safe to overwrite) | Reclaimed | green
-4 | Unsent Telemetry Backlog (Read Pointer -> Write Pointer) | Waiting for reconnect | amber
-2 | Priority Alarm Reserve (Never overwritten by routine logs!) | Critical alerts | red
-```
-
-## 5. Distributed resilience checklist {style=card colour=amber}
+## 7. Checklist {style=card colour=amber}
 
 ```checklist
-[x] Put an explicit **timeout** on every network socket, database query and hardware bus call (never use infinite timeout in production)
-[x] Add **Full Jitter** (seeded from a hardware True Random Number Generator `TRNG`) to every reconnect and retry timer
-[x] Include a unique `[DeviceID, SequenceNumber]` or `UUID` **Idempotency Key** in every mutating command and telemetry batch
-[x] Bound every in-memory and flash queue; define an explicit overflow policy (`Drop Oldest` for telemetry, `Reject / Backpressure` for commands)
-[x] Test resilience in Continuous Integration (`CI`) using fault injection (drop 20% of packets, delay ACKs by 5 seconds, kill broker mid-transfer)
+[x] A timeout on every socket, query and bus call
+[x] Full jitter, seeded from a TRNG, on every retry and reconnect
+[x] An idempotency key in every command and telemetry batch
+[x] Every queue bounded, with a stated overflow policy: drop oldest, or push back
+[x] Fault injection in CI: drop 20 % of packets, delay ACKs, kill the broker mid-transfer
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 8. Glossary
 
-```cards cols=4 style=label
-UUID | Universally Unique Identifier (128-bit ID): used as an Idempotency Key so retried requests are deduplicated safely
-TRNG | True Random Number Generator: hardware entropy source required so fleet devices do not compute identical retry jitter
-DLQ | Dead-Letter Queue: holding queue where corrupt or repeatedly failing ("poison pill") messages are isolated
-OOM | Out-Of-Memory: system crash caused by unbounded queues or retry buffers growing when a downstream network stalls
-RPC & REST | Remote Procedure Call and Representational State Transfer: network communication styles requiring explicit timeouts
-ACK & NACK | Positive Acknowledgement and Negative Acknowledgement: transport or application confirmation messages
-SLO & MTTR | Service Level Objective (uptime target) and Mean Time To Recovery (how fast a system heals after a fault)
-CI | Continuous Integration: automated test pipeline running chaos and fault-injection scenarios
+```glossary cols=1
+DLQ | Dead-letter queue
+Idempotent | Safe to repeat: the same result every time
+MTTR | Mean time to recovery
+OOM | Out of memory
+TRNG | True random number generator
+UUID | Universally unique identifier
 ```
 
 ## In short {.summary}
 
-Assume every network call will eventually time out. Bound every wait with a **timeout**, space out retries with **Exponential Backoff + Full Jitter**, make retries safe with **Idempotency Keys**, and buffer offline telemetry in a **bounded Flash ring**.
+Assume every call will time out. Bound every wait, spread retries with jitter, make them safe with idempotency keys, and buffer offline data in a bounded ring.
 
 ### Never retry without jitter
 
-Synchronised retries turn a 5-second network blip into a self-inflicted denial-of-service attack across your entire device fleet.
+Synchronised retries turn a five-second blip into a denial-of-service attack on yourself.
 
-### If you retry, you must be idempotent
+### If you retry, be idempotent
 
-Because a timeout could mean the request failed *or* the reply was lost, every retried operation must carry an Idempotency Key.
+A timeout may mean the request failed, or that the reply was lost.
 
 ### Bound every queue
 
-An unbounded queue is just a delayed out-of-memory crash; cap every buffer and decide up front whether to apply backpressure or overwrite the oldest sample.
+An unbounded queue is an out-of-memory crash, postponed.

@@ -1,133 +1,135 @@
 ---
-title: "Mixed-Signal Chains: Analogue, Pulse-Width and Direct Memory"
-subtitle: Sampling real-world sensors and driving actuators at megahertz rates with zero processor overhead
-byline: Embedded Mixed-Signal Hardware & Peripheral Architecture Explainer
+title: "Mixed-Signal Chains: ADC, PWM and DMA"
+subtitle: Sampling sensors and driving actuators at megahertz rates, with the processor asleep
+byline: Embedded hardware engineering
 orientation: landscape
-columns: 2
+columns: 3
 paper: a1
 width: 1750
 document_number: PO-018
-version: "1.0"
 colours:
   accent: "#7c3aed"
   secondary: "#6d28d9"
 footer:
-  left: ADC, PWM & DMA Signal Chain Explainer
-  centre: Mixed-Signal Embedded Reference
-  right: Nyquist, SAR vs Sigma-Delta, PWM & Ping-Pong DMA Guide
+  left: ADC, PWM and DMA
+  centre: Embedded Engineering Reference
   qr: https://en.wikipedia.org/wiki/Analog-to-digital_converter
-  qr-label: Mixed-Signal Reference
+  qr-label: ADCs on Wikipedia
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| > 2 × f_max | Nyquist-Shannon minimum sampling rate to prevent frequency aliasing | anti-alias filter | good |
-| 4,096 steps | Voltage resolution of a 12-bit Analogue-to-Digital Converter (ADC) | `0.8 mV` at `3.3 V` | good |
-| 0% CPU | Processor load while Direct Memory Access (DMA) streams ADC samples | background copy | good |
-| 2 halves | Ping-pong circular DMA buffer (`Half-Complete` & `Complete` interrupts) | zero lost samples | good |
+| Value | Label |
+|---|---|
+| Over 2 × f_max | The Nyquist rate: sample faster, or high frequencies fold back |
+| 0.8 mV | One step of a 12-bit ADC at 3.3 V |
+| 0 % CPU | While DMA moves the samples |
+| 2 halves | Of a ping-pong buffer: the CPU reads one while DMA fills the other |
 
 ## Introduction {.abstract}
 
-Every embedded system bridges the analogue physical world and digital software. An **Analogue-to-Digital Converter (ADC)** quantises continuous voltages into binary numbers at a fixed sample rate, while **Pulse-Width Modulation (PWM)** and **Digital-to-Analogue Converters (DACs)** drive actuators. Hardware timers and **Direct Memory Access (DMA)** stream millions of samples per second into **Static Random-Access Memory (SRAM)** without waking the **Central Processing Unit (CPU)**.
+Every embedded system bridges the analogue world and software. An **analogue-to-digital converter (ADC)** turns a voltage into a number at a fixed rate; **pulse-width modulation (PWM)** and **DACs** drive the outputs. A hardware timer and **direct memory access (DMA)** can stream millions of samples a second into RAM without waking the CPU.
 
-## 1. Zero-CPU hardware signal chain {.wide}
+## 1. A signal chain with no CPU in it {.wide}
 
-Instead of firing an interrupt on every single sample, link a hardware timer trigger (`TRGO`) to the ADC and let a circular DMA channel fill a double buffer:
+Instead of an interrupt for every sample, a timer triggers the ADC and a circular DMA channel fills a double buffer:
 
 ```mermaid
 flowchart LR
-  Sensor["Analogue Sensor\n(0 to 3.3 V)"] --> AAF["RC Anti-Aliasing\nLow-Pass Filter"]
-  AAF --> ADC["12/16-bit SAR ADC\n(Sample & Hold)"]
-  Timer["Hardware Timer\n(Exact Sample Clock)"] -- "TRGO Trigger\n(Zero Jitter)" --> ADC
-  ADC -- "DMA Request" --> DMA["DMA Controller\n(Circular Mode)"]
-  DMA -- "Writes 1st Half" --> BufA["Ping Buffer [0..N/2-1]\n(Half-Transfer IRQ)"]
-  DMA -- "Writes 2nd Half" --> BufB["Pong Buffer [N/2..N-1]\n(Transfer-Complete IRQ)"]
-  BufA & BufB --> DSP["CPU / DSP Core\nProcesses ready half!"]
+  Sensor["Sensor, 0 to 3.3 V"] --> AAF["RC anti-alias filter"] --> ADC["SAR ADC"]
+  Timer["Hardware timer"] -- "TRGO: no jitter" --> ADC
+  ADC -- "DMA request" --> DMA["DMA, circular mode"]
+  DMA --> Buf["Ping-pong buffer in SRAM"]
+  Buf -- "half or full interrupt" --> CPU["CPU processes the finished half"]
 ```
 
-[[CAPTION:Figure]] While the DMA controller fills the Pong half of the buffer, the CPU safely processes the completed Ping half with zero race conditions.
+## 2. The ping-pong buffer
 
-## 2. Choosing an ADC architecture
-
-Microcontrollers integrate **Successive Approximation Register (SAR)** converters for fast general-purpose sampling, while precision instrumentation uses **Sigma-Delta (`ΣΔ`)** converters:
-
-```compare
-| Successive Approximation Register (`SAR`) | Sigma-Delta (`ΣΔ` / Delta-Sigma)
-Conversion principle | Binary search using a capacitive charge-redistribution DAC | Oversamples at megahertz with a 1-bit modulator and digital decimation filter
-Typical resolution | **10 to 16 bits** (`1,024` to `65,536` steps) | **16 to 24 bits** (`65,536` to `16.7 million` steps)
-Typical sample rate | **100 kSPS to 5+ MSPS** (fast snapshots) | **10 SPS to 100 kSPS** (high precision, higher latency)
-Built-in digital filtering | None (requires external RC anti-aliasing filter) | Built-in `sinc` filter (often rejects `50 Hz` / `60 Hz` mains hum)
-Best suited for | Motor current control, battery sensing, ultrasonic & audio | Strain gauges, thermocouples, weigh scales & precision metering
+```ring cells=16
+fill: 0-7 | Ping: the CPU reads it | green
+fill: 8-15 | Pong: DMA is filling it | purple
+pointer: 11 | DMA write | red
+pointer: 3 | CPU read | navy
 ```
 
-## 3. Resolution, effective bits and oversampling
+DMA raises a **half-transfer** interrupt when Ping is full, and a **transfer-complete** interrupt when Pong is. At 500 kHz with 1,024 samples, that is about 1,000 interrupts a second instead of 500,000.
 
-A 12-bit ADC referenced to `Vref = 3.300 V` has a **Least Significant Bit (`LSB`)** step size of `3.300 V / 4096 = 0.805 mV`. Real noise reduces this to an **Effective Number of Bits (ENOB)**:
+## 3. Resolution and effective bits
 
-```cards cols=2 style=top
-Hardware Oversampling (+N extra bits) | Sampling `4^N` times faster and right-shifting the sum by `N` bits trades speed for resolution. Averaging **16 samples** (`4^2`) boosts a 12-bit ADC to **14-bit effective resolution** (`+12 dB` Signal-to-Noise Ratio) | purple
-Sample-and-Hold Capacitor (`Chold`) | When an ADC multiplexes a channel, an internal `~5 pF` capacitor must charge to the pin voltage. High-impedance dividers (`> 50 kΩ`) need a `100 nF` ceramic bypass capacitor on the pin or a longer sampling time (`Tsamp`) | blue
+```equation
+title: One step, and the bits that are real
+\mathrm{LSB} = \frac{V_{\text{ref}}}{2^{n}} \qquad \mathrm{ENOB} = \frac{\mathrm{SINAD} - 1.76}{6.02}
+V_{\text{ref}} | Full-scale reference | V
+n | Bits of the converter |
+\mathrm{SINAD} | Signal to noise and distortion | dB
 ```
 
-```figure
-@segments
-title: Ping-Pong Circular DMA Buffer in SRAM (1,024 samples total) — eliminates sample-by-sample interrupt overhead
-4 | Ping Half (Samples 0..511) — DMA triggers Half-Transfer Interrupt (HT) when full | CPU analyses Ping | green
-4 | Pong Half (Samples 512..1023) — DMA fills Pong concurrently in background | DMA writing Pong | purple
+```cards cols=1 style=top
+Oversampling | Take 4ᴺ samples, add them and shift right by N: N extra bits. Sixteen samples turn 12 bits into 14, +12 dB | purple
+The sample capacitor | Each conversion charges a capacitor of about 5 pF from the pin. A divider over 50 kΩ needs a 100 nF capacitor on the pin, or a longer sample time | blue
 ```
 
-## 4. Driving power with pulse-width modulation
+## 4. PWM: power without heat
 
-Because linear amplifiers waste power as heat, embedded systems switch **Metal-Oxide-Semiconductor Field-Effect Transistors (MOSFETs)** fully on and off using timer **PWM** channels:
+A transistor fully on or fully off wastes little power. PWM sets the average by the share of time it is on: at 25 % duty, the load sees a quarter of the supply.
 
-```lcd cols=1
-// Timer configured for 20 kHz centre-aligned PWM (ARR = 4000):
-TIM1->CCR1 = 1000; // 25.0% Duty Cycle -> V_avg = 0.25 * V_bus
-TIM1->CCR1 = 3000; // 75.0% Duty Cycle -> V_avg = 0.75 * V_bus
-TIM1->BDTR |= TIM_BDTR_DTG_500NS; // Hardware dead-time insertion!
--- Centre-aligned PWM triggers ADC at the exact midpoint of the pulse
+```instrument type=logic title="Half bridge: high side (HS), low side (LS), ADC trigger"
+HS | 000111111000000111111000
+LS | 110000000011110000000011
+ADC | 000001000000000001000000
 ```
 
 > [!WARNING]
-> When driving a half-bridge or H-bridge inverter (high-side + low-side MOSFETs), always enable hardware **dead-time insertion** (`100 ns` to `500 ns`) so both transistors never conduct simultaneously (**shoot-through** short circuit).
+> In a half or full bridge, always enable the timer's **dead time**, 100 to 500 ns, when both transistors are off. Without it, both conduct at once for an instant: **shoot-through**, a short across the supply.
 
-## 5. Mixed-signal board & firmware checklist {style=card colour=purple}
+Trigger the current measurement in the **middle of the pulse**, when the switching ringing has settled.
 
-```checklist
-[x] Fit an external `R-C` anti-aliasing filter before the ADC pin to attenuate frequencies above half the sample rate (`f_s / 2`)
-[x] Trigger the ADC from a hardware timer (`TIM_TRGO`), never from a software delay loop, to eliminate sampling phase jitter
-[x] Run the microcontroller's built-in ADC offset self-calibration routine at startup and after large temperature swings
-[x] Read the internal bandgap voltage reference channel (`VREFINT`) to compensate for battery `Vdd` sag in software
-[x] When using `DMA` on Cortex-M7 (with Data Cache), place DMA buffers in non-cacheable SRAM or call `SCB_InvalidateDCache()`
+## 5. SAR or sigma-delta {.wide}
+
+```compare
+| Successive approximation (SAR) | Sigma-delta (ΣΔ)
+How | A binary search with a capacitor DAC | Oversamples at MHz with a 1-bit modulator, then filters digitally
+Resolution | **10 to 16 bits** | **16 to 24 bits**
+Speed | **100 kSPS to over 5 MSPS** | **10 SPS to 100 kSPS**, with more latency
+Filtering | None: needs an external anti-alias filter | Built-in sinc filter, often notching 50 and 60 Hz
+For | Motor current, battery sensing, audio, ultrasound | Strain gauges, thermocouples, scales, metering
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 6. Checklist {cols=2 style=card colour=purple}
 
-```cards cols=4 style=label
-ADC & DAC | Analogue-to-Digital Converter (voltage to integer) and Digital-to-Analogue Converter (integer to voltage)
-SAR | Successive Approximation Register: fast binary-search ADC architecture integrated into most microcontrollers
-DMA | Direct Memory Access: hardware engine that transfers data between peripherals and SRAM without CPU instructions
-PWM | Pulse-Width Modulation: encoding an analogue level into the duty cycle (on-time ratio) of a square wave
-ENOB & SNR | Effective Number of Bits (real noise-free resolution) and Signal-to-Noise Ratio (measured in decibels)
-LSB & Vref | Least Significant Bit (smallest measurable voltage step) and Reference Voltage defining the ADC full scale
-SPS & MSPS | Samples Per Second and Mega-Samples Per Second (million conversions per second)
-MOSFET | Metal-Oxide-Semiconductor Field-Effect Transistor: fast electronic switch driven by PWM timer channels
+```checklist
+[x] An RC anti-alias filter before the ADC pin, cutting above half the sample rate
+[x] ADC triggered by a hardware timer, never by a software delay
+[x] The ADC's own offset calibration run at start-up and after large temperature changes
+[x] The internal reference channel read, to correct for a sagging supply
+[x] On a Cortex-M7, DMA buffers in non-cacheable RAM, or the cache invalidated before reading
+```
+
+## 7. Glossary
+
+```glossary cols=2
+ADC, DAC | Analogue-to-digital and digital-to-analogue converter
+DMA | Direct memory access
+ENOB | Effective number of bits
+LSB | Least significant bit: one step
+PWM | Pulse-width modulation
+SAR | Successive approximation register
+SINAD, SNR | Signal to noise and distortion, signal to noise
+SPS | Samples per second
 ```
 
 ## In short {.summary}
 
-Clock your **ADC** from a hardware timer and stream samples into a **ping-pong DMA buffer**. Average `4^N` samples for extra resolution, and synchronise **PWM** switching with ADC sampling.
+Clock the ADC from a hardware timer, stream it into a ping-pong DMA buffer, oversample for extra bits, and sample PWM currents in the quiet middle of the pulse.
 
-### Obey the sampling theorem
+### Obey Nyquist
 
-Any signal frequency above half your sampling rate folds back into your data as a phantom low-frequency alias.
+Anything above half the sample rate appears in your data as a false, lower frequency.
 
 ### Let DMA move the bytes
 
-Firing an interrupt at `500 kHz` leaves only 2 microseconds per sample; a 512-sample DMA ping-pong buffer cuts interrupts to `1 kHz`.
+One interrupt per half-buffer, not one per sample.
 
-### Sample PWM in the quiet middle
+### Mind the dead time
 
-Trigger motor current ADCs at the midpoint of a centre-aligned PWM pulse when transistor switching ringing has settled.
+A few hundred nanoseconds with both switches off saves the bridge.

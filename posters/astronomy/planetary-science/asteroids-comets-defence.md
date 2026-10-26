@@ -1,134 +1,134 @@
 ---
 title: "Asteroids, Comets, Meteorites and Planetary Defence"
-subtitle: Kirkwood orbital resonances, comet dual tails, carbonaceous meteorites, the Chicxulub impact and kinetic deflection
-byline: Popular Astrophysics, Planetary Science & Planetary Defence Explainer
+subtitle: Kirkwood gaps, comet tails, what meteorites carry, and how DART moved an asteroid
+byline: Planetary science explainer
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-050
-version: "1.0"
 colours:
   accent: "#d97706"
   secondary: "#92400e"
 footer:
-  left: Asteroids, Comets & Planetary Defence Explainer
-  centre: Planetary Science & Astrophysics Reference
-  right: Asteroid Belt, Comet Tails, Meteorites, Impact Scale & Kinetic Deflection Guide
+  left: Asteroids and Planetary Defence
+  centre: Planetary Science Reference
   qr: https://science.nasa.gov/planetary-defense/
-  qr-label: Planetary Defence Guide
+  qr-label: NASA planetary defence
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 4% of Moon | Total mass of the entire Main Asteroid Belt combined (mostly in Ceres!) | not a dense field! | good |
-| 10 km | Size of the Chicxulub asteroid that ended the non-avian dinosaurs 66M yr ago | 100M Megatons | bad |
-| 2 Tails | Every active comet grows a blue Ion Tail and a curved white/yellow Dust Tail | points away from Sun | good |
-| -33 minutes | Orbital period change when our kinetic impactor rammed asteroid Dimorphos! | planetary defence | good |
+| Value | Label |
+|---|---|
+| 3 % | Of the Moon's mass: the whole main belt, a third of it in Ceres |
+| 10 km | The Chicxulub impactor that ended the dinosaurs, 66 million years ago |
+| 2 tails | On every active comet: blue ion and curved white dust |
+| −33 minutes | Change to Dimorphos's orbit after DART hit it |
 
 ## Introduction {.abstract}
 
-**Asteroids** and **Comets** are the leftover construction debris from the birth of the Solar System **4.567 billion years ago**. While the planets melted and differentiated into cores and mantles, asteroids and comets stayed relatively pristine—preserving the original minerals, water ice and **amino acids** of the protoplanetary nebula. Yet orbital resonances with **Jupiter** occasionally kick these rocky and icy time capsules onto Earth-crossing paths (**Near-Earth Objects, `NEOs`**). For the first time in Earth's 4.5-billion-year history, humanity now has the telescopes and kinetic impactor spacecraft (**Double Asteroid Redirection Test, `DART`**) to deflect a dinosaur-killer.
+**Asteroids** and **comets** are the leftover building material of the Solar System, 4.567 billion years old. The planets melted and changed, but these stayed close to how they formed, with their minerals, ices and even **amino acids**. Jupiter's gravity now and then nudges one onto a path that crosses Earth's. For the first time, we can find them early and **move them**.
 
-## 1. Comparing asteroids, comets and meteoroids {.wide}
+## 1. Asteroids and comets compared {.wide}
 
-What is the difference between a **Meteoroid**, a **Meteor** and a **Meteorite**? Location! In space it is a **Meteoroid** (`< 1 metre` pebble or boulder). Streaking through Earth's atmosphere at `11 to 72 km/s` as a "shooting star" plasma trail it is a **Meteor** (or **Bolide** fireball), and if a rock hits the ground, it is a **Meteorite**!
+A rock in space is a **meteoroid**, a streak of light in the air (at 11 to 72 km/s) a **meteor**, and a rock that lands a **meteorite**.
 
 ```compare
-| Asteroids (`C-Type`, `S-Type`, `M-Type`) | Short-Period Comets (`Jupiter Family`) | Long-Period Comets (`Oort Cloud`)
-Where they formed & live | Formed inside or near the Frost Line (`2 to 4 AU`); live in the **Main Belt (`2.1–3.3 AU`)**, **Trojans** or **Near-Earth (`NEO`)** orbits | Formed beyond Neptune (`> 30 AU`); stored in the flat **Kuiper Belt & Scattered Disk** | Formed near the giant planets (`5–30 AU`), then flung into the spherical **Oort Cloud (`2,000–100,000 AU`)**
-Composition | **Carbonaceous (`C`, `75%`)**: clay + organics; **Stony (`S`, `17%`)**: silicates; **Metallic (`M`, `8%`)**: Iron-Nickel cores | **"Dirty Snowballs" / "Icy Dirtballs"**: `~50%` water/CO/CO₂ ice + `50%` silicate dust and dark organic tar | Pristine volatile ices (`H₂O`, `CO`, `CH₄`, `NH₃`, `HCN`) + untouched pre-solar interstellar dust grains
-Orbital shape & tilt | Mostly **low-inclination, near-circular** orbits in the same plane as the planets | Elliptical orbits (`Period < 200 years`) tilted `< 30°` (`Comet 67P/Churyumov-Gerasimenko`, `Halley`) | **Extreme parabolas (`Period 1,000 to Millions of years`)** arriving from *any* angle (`Hale-Bopp`, `NEOWISE`)
-Famous space missions | **`OSIRIS-REx`** (`Bennu` sample return), **`Hayabusa2`** (`Ryugu`), **`Psyche`** (metal world) & **`Dawn`** (`Ceres/Vesta`) | **ESA `Rosetta` & `Philae` lander** (`Comet 67P`), **`Stardust`** (`Wild 2` sample return) & **`Deep Impact`** | **ESA `Comet Interceptor` (`2029`)**: will wait at `L2` to ambush a pristine first-time Oort Cloud comet!
+| Asteroids | Short-period comets | Long-period comets
+Where they live | The **main belt, 2.1 to 3.3 AU**, the Trojans, and near-Earth orbits | The flat **Kuiper Belt** and scattered disk, beyond Neptune | The spherical **Oort Cloud**, 2,000 to 100,000 AU
+Made of | **C-type** (75 %): clay and carbon. **S-type** (17 %): stone. **M-type** (8 %): iron and nickel | **"Dirty snowballs"**: water, CO and CO₂ ice with dust and dark organics | The most pristine ices in the Solar System
+Orbits | Nearly circular, in the plane of the planets | Elliptical, periods under 200 years, tilted under 30° | **Very long**, from any direction
+Missions | **OSIRIS-REx** (Bennu), **Hayabusa2** (Ryugu), Psyche, Dawn | **Rosetta** and Philae (67P), Stardust, Deep Impact | **Comet Interceptor**, launching about 2029, will wait at L2 for one
 ```
 
-## 2. Why comets grow two tails (and why both point away from the Sun!)
+## 2. Why a comet has two tails
 
-A comet's solid **nucleus** is typically just `1 to 20 km` wide and darker than coal (`4%` reflectivity). When it swings inside `~3 AU`, sunlight sublimates ice directly into gas. That gas inflates a `100,000-km` atmosphere (**Coma**) and **two distinct tails** that always point *away* from the Sun:
+A nucleus is 1 to 20 km across and darker than coal. Inside about 3 AU, sunlight turns its ice to gas, which makes a coma 100,000 km wide and two tails. The **ion tail** is blown straight back by the solar wind. The **dust tail** is pushed gently by sunlight, and curves along the orbit.
 
-```lcd cols=1
-                                              [Curved Yellow/White Dust Tail]
-                                          . - '   (Pushed gently by Solar Photon Radiation
-                                    . - '          Pressure; lags behind along orbit!)
-       ( THE SUN )  ===>       . - '
-     Solar Wind & Light   [Comet Nucleus + Coma] ===================> [Straight Blue Ion Tail]
-                                |                 (CO+ ions swept straight back at 400 km/s
-                                |                  by the magnetised Solar Wind!)
-                                v  Comet's Orbital Path
+```orbits star=Sun unit=" AU" scale=sqrt
+orbit: Earth | 1 | blue
+orbit: Jupiter | 5.2 | amber
+comet: 17.8 | 0.967 | Halley's Comet
 ```
 
-- **Why Meteor Showers Happen (`Perseids` in August, `Geminids` in December)**: As a comet orbits the Sun, it leaves a dusty gravel trail along its elliptical track. Whenever Earth ploughs through **Comet Swift-Tuttle's** debris stream every August, sand-sized comet grains vaporise at `59 km/s` at `100 km` altitude—creating the **Perseid meteor shower**!
+Earth crosses the dust a comet leaves along its orbit every year. Comet Swift-Tuttle's grains, hitting the air at 59 km/s, are the August **Perseids**.
 
-## 3. Orbital resonance gaps: how Jupiter flings asteroids at Earth
+## 3. Kirkwood gaps: how Jupiter sends asteroids our way
 
-Hollywood movies show the **Main Asteroid Belt** as a crowded obstacle course where spaceships dodge boulders every second. In reality, the average distance between two `1-km` asteroids is **`over 1 million kilometres`** (`3×` the Earth-Moon distance!). So how do asteroids ever leave the belt to hit Earth? Through **Kirkwood Orbital Resonances** with **Jupiter**:
+The belt is not a crowded obstacle course: two asteroids a kilometre wide are typically millions of kilometres apart. But where an asteroid's year is a simple fraction of Jupiter's 11.86, regular tugs stretch its orbit until it leaves. Those **resonances** empty gaps in the belt, and feed near-Earth orbits.
 
-```figure
-@segments
-title: Main Asteroid Belt zones and Kirkwood Resonance Gaps (Where an asteroid's period is a simple fraction of Jupiter's 11.86-year orbit!)
-3 | Inner Belt (2.1–2.5 AU): Silicate S-Type Asteroids | Stony | amber
-1 | 3:1 Kirkwood Gap (2.50 AU): EMPTIED! Flung into Near-Earth Orbits! | NEO Delivery! | red
-3 | Middle Belt (2.5–2.82 AU): Ceres (940 km Dwarf Planet) & Vesta | 5:2 & 7:3 Gaps | blue
-3 | Outer Belt (2.82–3.3 AU): Dark Carbonaceous C-Type Asteroids (2:1 Gap at 3.28 AU) | Water-Rich | teal
+```threshold title="The main belt and its Kirkwood gaps"
+span: Inner belt | 2.1 to 2.5 AU | Stony S-types, Vesta | amber | 3
+pin: 2.50 AU 3:1 gap, the main route to Earth | red
+span: Middle belt | 2.5 to 2.82 AU | Ceres | blue | 3
+pin: 2.82 AU 5:2 gap | red
+span: Outer belt | 2.82 to 3.28 AU | Dark C-types, rich in water | teal | 3
+pin: 3.28 AU 2:1 gap | red
 ```
 
-```chart type=bar title="Impact kinetic energy by object diameter (log10 Megatons of TNT)" unit=" log MT" max=10
-Chelyabinsk (20m) | 0
-Tunguska (50m) | 1
-Regional (140m) | 3
-Global (1 km) | 5
-Chicxulub (10 km)! | 8
+The **Yarkovsky effect**, a tiny thrust from heat an asteroid radiates, slowly drifts small ones into the gaps.
+
+## 4. What meteorites tell us {style=card colour=amber}
+
+```cards cols=1 style=label
+Carbonaceous chondrites | Murchison, Bennu and Ryugu carry stardust older than the Sun, 10 % water, over 70 amino acids, and all five bases of DNA and RNA
+Iron meteorites | Pieces of the cores of shattered protoplanets. Their crystal patterns show they cooled a few degrees in a million years
+The iridium layer | In 1980 Luis and Walter Alvarez found a worldwide clay layer, 66 million years old, rich in iridium, rare on Earth but common in asteroids. The 180 km Chicxulub crater was found in 1991
 ```
 
-## 4. What meteorites tell us in the lab {style=card colour=amber}
+## 5. Size and energy
 
-```checklist
-[x] **Carbonaceous Chondrites (`Murchison`, `Bennu`, `Ryugu`)**: Contain untouched pre-solar diamond/silicon-carbide stardust, `10%` locked water, **over 70 amino acids** and all five nucleobases of `DNA`/`RNA` (`A, C, G, T, U`)!
-[x] **Iron Meteorites (`Widmanstätten` Crystal Patterns)**: Pieces of the shattered cores of ancient protoplanets that cooled at just `1 to 100 °C per million years`
-[x] **The Iridium Spike (`Alvarez Hypothesis`, 1980)**: Walter and Luis Alvarez proved a `10-km` asteroid killed the dinosaurs (`66 million years` ago) by finding a global clay layer enriched 100-fold in **Iridium** (rare in Earth's crust, abundant in asteroids) plus the `180-km` **Chicxulub crater** in Mexico!
-[x] **Over 95% of `1-km+` Near-Earth Asteroids Are Already Tracked**: None of the known `1-km+` "planet killers" are on a collision course with Earth for centuries; current surveys (`NEO Surveyor`, `Rubin`) focus on `140-metre` city-destroyers
+```logscale unit=" Mt"
+0.5 | Chelyabinsk, 20 m, 2013 | green
+10 | Tunguska, 50 m, 1908 | amber
+200 | 140 m: destroys a region | red
+7e4 | 1 km: global effects | red
+1e8 | Chicxulub, 10 km | purple
 ```
 
-## 5. Impact hazard scales and the `DART` planetary defence test {.wide}
+Over 95 % of near-Earth asteroids above 1 km are known, and none will hit for centuries. Surveys now hunt the **140 m** ones.
 
-Every day, `~100 tonnes` of microscopic cosmic dust drifts harmlessly down to Earth. Larger impacts follow an inverse power law—small airbursts happen every century, while civilisation-threatening impacts happen every `10 to 100 million years`:
+## 6. Planetary defence: DART {.wide}
 
-```mermaid
-flowchart LR
-  Detect["1. Early Infrared Detection\nNEO Surveyor & Vera Rubin find\ndark hazardous asteroids decades\nbefore potential Earth impact!"] --> Launch["2. Launch Kinetic Impactor\nIntercept the asteroid years early\nwhile it is still millions of km away\n(Tiny nudge -> Huge miss distance!)"]
-  Launch --> DART["3. NASA DART Impact (Sept 2022)\n570 kg spacecraft rams 160-m moonlet\nDimorphos at 6.1 km/s\n(11 million km from Earth)"]
-  DART --> Ejecta["4. Recoil Ejecta Boost (Beta = 3.6x!)\n1,000+ tonnes of rock blasted backward\nlike a rocket exhaust -> Shortens\norbit by 33 minutes (Success!)"]
+```flow
+[Find it early|blue] -NEO Surveyor, Rubin-> [Launch an impactor|navy] -years ahead-> [Hit it|amber] -ejected rock adds recoil-> [It misses Earth|green]
 ```
 
-[[CAPTION:Figure]] Why try to blow up an asteroid with a nuclear bomb (turning one cannonball into a thousand radioactive shotgun pellets!) when a **gentle `1 cm/s` velocity nudge** applied **10 years early** causes the asteroid to miss Earth completely by `30,000 kilometres`?
+```highlight cols=3
+6.1 km/s | DART's speed into Dimorphos | 570 kg, 26 September 2022 | navy
+−33 min | Change to its 12-hour orbit | Predicted: at least 73 seconds | green
+3.6 × | The push, compared with the spacecraft's momentum alone | Thrown-off rock acted as a rocket | amber
+```
 
-## 6. Acronym guide: every term defined {.wide}
+> [!TIP]
+> Why not a bomb? One rock would become a shower of fragments. A nudge of 1 cm/s ten years ahead moves an asteroid about one Earth radius on arrival: enough to miss. ESA's **Hera** reaches Dimorphos in 2026 to measure the crater.
 
-```cards cols=4 style=label
-NEO & PHO | Near-Earth Object (perihelion `< 1.3 AU`) and Potentially Hazardous Object (`> 140 m` wide passing within `0.05 AU` / `19.5` Moon distances of Earth)
-Atira, Aten, Apollo, Amor | The four orbital classes of Near-Earth Asteroids based on whether their orbits stay inside, cross or graze Earth's `1.0 AU` orbit
-C, S & M Types | Carbonaceous (dark, primitive, water/organic-rich), Silicaceous/Stony (rocky inner belt) and Metallic (Iron-Nickel core fragments)
-Chondrite & Achondrite | Primitive stony meteorite containing spherical melted droplets (**Chondrules** from the solar nebula) vs differentiated volcanic/core rock
-Yarkovsky Effect | Tiny thermal-radiation thrust caused when a spinning asteroid re-emits afternoon heat into space—slowly drifting asteroids into Kirkwood gaps!
-Torino & Palermo Scales | Public (`0 to 10`) and technical logarithmic scales rating an asteroid's collision probability and kinetic damage potential
-DART & Hera | Double Asteroid Redirection Test (`2022` impactor at Dimorphos) and European Space Agency **Hera** follow-up probe (`arriving 2026` to weigh the crater)
-OSIRIS-REx & Hayabusa2 | Sample-return missions that brought pristine carbon-rich gravel back to Earth from asteroids **Bennu** (`2023`) and **Ryugu** (`2020`)
+## 7. Glossary {.wide}
+
+```glossary cols=4
+Chondrite | A stony meteorite of melted droplets from the solar nebula
+DART | Double Asteroid Redirection Test
+Kirkwood gap | An empty band of the belt, at a resonance with Jupiter
+NEO | Near-Earth object: perihelion under 1.3 AU
+PHA | Potentially hazardous asteroid: over 140 m, within 0.05 AU
+Rubble pile | An asteroid of loose rock, up to half empty space
+Torino scale | A 0 to 10 public rating of an impact threat
+Yarkovsky effect | The drift caused by the heat an asteroid radiates
 ```
 
 ## In short {.summary}
 
-**Asteroids and Comets** are both our **creators** and a natural **hazard**. Carbonaceous asteroids and comets delivered water and prebiotic organic molecules to the young Earth, while **Kirkwood resonances** with Jupiter occasionally perturb rocks into **Near-Earth Orbits**. Thanks to **sky surveys and kinetic impactors (`DART`)**, asteroid impacts are the **only major natural disaster humanity can prevent**.
+Asteroids and comets brought Earth water and organics, and now and then a disaster. With surveys and impactors, an asteroid strike is the one natural disaster we can prevent.
 
-### Why asteroids are irregular potatoes while planets are round
+### Why asteroids are potatoes
 
-Gravity only crushes solid rock into a sphere (**Hydrostatic Equilibrium**) once an object exceeds `~400 to 600 km` across (`Ceres` is round; smaller asteroids are lumpy rubble piles!).
+Gravity pulls rock round only above about 400 to 600 km across. Ceres is round; smaller asteroids are lumpy.
 
-### Many asteroids are flying piles of gravel
+### Many are piles of gravel
 
-`OSIRIS-REx` and `Hayabusa2` revealed that asteroids like **Bennu** and **Dimorphos** are not solid monoliths—they are loose **"rubble piles"** with `50%` empty void space inside!
+Bennu and Dimorphos are not solid: they are loose rubble, up to half empty space.
 
-### Dinosaurs didn't have a space programme
+### The dinosaurs had no space programme
 
-The Chicxulub impactor (`66M years ago`) released `10 billion Hiroshima bombs` of energy and blocked sunlight for years; today, **Vera Rubin** and **infrared survey telescopes** stand guard so we never get caught by surprise.
+Chicxulub released as much energy as billions of Hiroshima bombs. Today, Rubin and infrared surveys keep watch.
