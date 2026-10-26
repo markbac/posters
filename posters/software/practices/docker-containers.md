@@ -1,150 +1,151 @@
 ---
 title: "Containers vs Virtual Machines"
-subtitle: How Linux kernel namespaces, control groups and layered filesystems isolate applications
-byline: Cloud & Embedded Infrastructure Engineering Explainer
+subtitle: How namespaces, control groups and layered filesystems isolate applications
+byline: Software practices
 orientation: portrait
 columns: 2
 paper: a1
 width: 1200
 document_number: PO-014
-version: "1.0"
 colours:
   accent: "#0284c7"
   secondary: "#0369a1"
 footer:
-  left: Containers vs Virtual Machines Explainer
-  centre: Systems & Infrastructure Reference
-  right: Docker, OCI, Namespaces & cgroups Guide
+  left: Containers and VMs
+  centre: Software Engineering Reference
   qr: https://opencontainers.org/
   qr-label: Open Container Initiative
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| < 100 ms | Typical Open Container Initiative (OCI) container startup latency | vs 30 s VM boot | good |
-| 1 kernel | All containers on a host share one Linux Operating System (OS) kernel | zero guest OS | good |
-| 5 to 50 MB | Typical minimal Alpine or distroless container image footprint | vs multi-GB VM | good |
-| 3 pillars | Namespaces (view), Control Groups (limits) and OverlayFS (layers) | kernel native | good |
+| Value | Label |
+|---|---|
+| Under 100 ms | To start a container; a VM takes 10 to 60 s |
+| 1 kernel | Shared by every container on a host |
+| 5 to 50 MB | A minimal Alpine or distroless image |
+| 3 kernel features | Namespaces, cgroups and OverlayFS |
 
 ## Introduction {.abstract}
 
-Traditional **Virtual Machines (VMs)** isolate applications by emulating computer hardware via a **hypervisor** and booting a complete Guest **Operating System (OS)** for every workload. Each VM consumes gigabytes of **Random-Access Memory (RAM)** and takes seconds to boot. **Open Container Initiative (OCI)** containers take a different approach: they run as isolated user-space processes directly on a shared host Linux kernel. By combining kernel **namespaces**, **control groups (`cgroups`)** and **union filesystems**, containers deliver reproducible packaging with bare-metal speed.
+A **virtual machine (VM)** isolates a workload by emulating hardware with a **hypervisor**, and boots a whole guest operating system: gigabytes of memory and seconds to start. An **OCI container** is an ordinary process on a shared Linux kernel, isolated by **namespaces**, limited by **control groups**, and given a layered filesystem. It packages software reproducibly, at bare-metal speed.
 
-## 1. Architectural stack: virtual machines vs containers {.wide}
+## 1. A virtual machine
 
-Compare where the isolation boundary sits in hardware virtualisation versus operating-system virtualisation:
-
-```mermaid
-flowchart TB
-  subgraph VMStack["Virtual Machine Stack (Hardware Virtualisation)"]
-    direction LR
-    VHost["Physical Hardware & Host OS"] --> Hyp["Hypervisor (KVM / Hyper-V)"]
-    Hyp --> VGuestA["Guest OS Kernel A + Libs + App A"]
-    Hyp --> VGuestB["Guest OS Kernel B + Libs + App B"]
-  end
-  subgraph ContStack["Container Stack (OS-Level Virtualisation)"]
-    direction LR
-    CHost["Physical Hardware & Shared Host Linux Kernel"] --> Eng["Runtime (containerd / runc)"]
-    Eng --> CAppA["Container A (Namespaces + cgroups + App A)"]
-    Eng --> CAppB["Container B (Namespaces + cgroups + App B)"]
-  end
+```stack
+App A | app | With its libraries | green
+Guest OS | kernel | A whole kernel per VM | amber
+Hypervisor | KVM | Hyper-V, Xen | navy
+Host | hardware | CPU, memory, disks | grey
+side: One VM | 1-2 | amber
 ```
 
-[[CAPTION:Figure]] Virtual machines virtualise hardware to run multiple kernels; containers virtualise a single kernel to run isolated process trees.
+## 2. A container
 
-## 2. Head-to-head comparison {.wide}
+```stack
+App A | app | With its libraries | green
+Runtime | runc | containerd, CRI-O | blue
+Host kernel | Linux | Shared by every container | navy
+Host | hardware | CPU, memory, disks | grey
+side: One container | 1-1 | green
+```
+
+## 3. Side by side {.wide}
 
 ```compare
-| Virtual Machine (VM) | Open Container Initiative (OCI) Container
-Isolation boundary | Hardware virtualisation via a **Hypervisor** and Central Processing Unit (CPU) extensions | Kernel **namespaces** and **Control Groups (`cgroups`)** on a shared host kernel
-Operating system kernel | Dedicated Guest OS kernel per virtual machine | All containers share the single host Linux kernel
-Startup latency | **10 to 60 seconds** (full firmware and Guest OS boot sequence) | **Under 100 milliseconds** (spawns a regular host user-space process)
-Memory & disk footprint | Gigabytes of RAM and `5` to `20 GB` disk image per instance | Megabytes of RAM and `5` to `200 MB` layered image
-Cross-OS compatibility | Can run a Windows VM on a Linux host (or vice versa) | Linux containers require a Linux kernel (or a lightweight utility VM)
-Security blast radius | **Strong hardware boundary**; a guest kernel panic stays inside the VM | Kernel vulnerability can affect the host unless hardened with `seccomp` and rootless mode
+| Virtual machine | OCI container
+Boundary | **Hardware virtualisation**: a hypervisor and CPU extensions | **Kernel namespaces and cgroups** on a shared kernel
+Kernel | One per VM | **One for the host**
+Start-up | **10 to 60 s**: firmware and a whole OS boot | **Under 100 ms**: a process starts
+Size | Gigabytes of RAM, 5 to 20 GB of disk | Megabytes of RAM, 5 to 200 MB of image
+Other operating systems | Windows on Linux, or the reverse | Linux containers need a Linux kernel, or a small VM
+Blast radius | **Strong**: a guest kernel panic stays in the VM | A kernel bug can reach the host, unless hardened with seccomp and rootless mode
 ```
 
-## 3. The three Linux kernel primitives {.wide}
+## 4. Three kernel features {.wide}
 
-A "container" is not a single object in the Linux kernel—it is a normal process configured with three kernel features:
+A "container" is not one thing in the kernel. It is a process given three features:
 
 ```cards cols=3 style=top
-1. Namespaces (What a process sees) | Partition global kernel resources so a container only sees its own Process Identifier (PID) tree (`pid`), network stack (`net`), mount table (`mnt`), hostname (`uts`), Inter-Process Communication (IPC) (`ipc`) and user IDs (`user`) | navy
-2. Control Groups (What a process uses) | Linux `cgroups v2` meter and cap how much CPU time, physical RAM, block Input/Output (I/O) bandwidth and network throughput a container process group can consume, preventing noisy-neighbour starvation | blue
-3. OverlayFS (Layered Copy-on-Write storage) | Stacks immutable, content-addressed read-only image layers beneath a thin Copy-on-Write (CoW) writable layer, allowing dozens of containers to share one base image on disk and in RAM page cache | teal
+Namespaces: what it sees | Its own process tree (pid), network (net), mounts (mnt), hostname (uts), IPC and user IDs (user) | navy
+cgroups: what it uses | Limits and accounts for CPU, memory, disk I/O and network, so one container cannot starve the rest | blue
+OverlayFS: its files | Read-only image layers, shared on disk and in cache, under a thin copy-on-write layer for each container | teal
 ```
 
-## 4. How OverlayFS image layers work
+## 5. Image layers
 
-Because lower layers are immutable and addressed by their **Secure Hash Algorithm (SHA)** digest, pulling an updated application image only downloads the changed top layer:
+Each read-only layer is named by its SHA-256 digest, so updating the app downloads only the top layer:
 
-```figure
-@segments
-title: Container Union Filesystem (OverlayFS) — shared read-only base layers + thin writable top layer
-2 | Upperdir: Container Writable Layer (Copy-on-Write) | Ephemeral changes | amber
-2 | Lowerdir 3: Application Binary (`/app/server`) | Read-only SHA-256 | green
-2 | Lowerdir 2: Runtime Libraries (`libc` / certificates) | Read-only shared | blue
-3 | Lowerdir 1: Base Userland (`Alpine` / `Debian`) | Read-only shared | navy
+```stack
+Writable layer | per container | Copy-on-write: gone with the container | amber
+Application | /app/server | The changed layer | green
+Runtime libraries | libc, CA certificates | Shared | blue
+Base userland | Alpine or Debian | Shared | navy
+side: Read-only, shared | 2-4 | navy
 ```
 
-## 5. Multi-stage container build pattern
+## 6. Multi-stage builds
 
-Multi-stage builds compile source code inside a full **Software Development Kit (SDK)** image, then copy only the compiled binary into a minimal runtime image:
+Compile in a full toolchain image, then copy only the binary into a minimal one:
 
-```lcd cols=1
-# Stage 1: Compile inside full SDK toolchain image
+```dockerfile
+# Stage 1: build with the full Go toolchain
 FROM golang:1.23-alpine AS builder
 WORKDIR /src
 COPY . .
 RUN CGO_ENABLED=0 go build -o /out/app ./cmd/server
 
-# Stage 2: Minimal distroless runtime image (no shell!)
+# Stage 2: a distroless runtime: no shell, no compiler
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=builder /out/app /app
 USER nonroot:nonroot
 ENTRYPOINT ["/app"]
--- Produces a 12 MB runtime image with zero compilers or shells
 ```
 
-## 6. Production container hardening checklist {style=card colour=blue}
+The result is about 12 MB.
 
-Running a process inside a container is not a security boundary unless you strip unnecessary privileges:
+## 7. Running it hardened
+
+```terminal title="Least privilege"
+$ docker run --read-only --tmpfs /tmp --cap-drop=ALL \
+    --memory=256m --cpus=0.5 --user 65532:65532 \
+    registry.example.com/app@sha256:9f86d0...
+-- Read-only root, no capabilities, capped memory and CPU, a non-root user, and an image pinned by digest
+```
+
+## 8. Hardening checklist {style=card colour=blue}
 
 ```checklist
-[x] Run as a non-root `USER` and enable user namespaces (`rootless` mode) so container UID 0 maps to an unprivileged host user
-[x] Drop all Linux kernel capabilities (`--cap-drop=ALL`) and add back only specific capabilities if strictly needed
-[x] Mount the container root filesystem as read-only (`--read-only`) and use `tmpfs` mounts for temporary directories
-[x] Set explicit memory (`--memory`) and CPU (`--cpus`) limits in `cgroups` to prevent denial-of-service exhaustion
-[x] Pin base images by immutable `@sha256` digest and scan layers in Continuous Integration (CI) before deployment
+[x] A non-root user, and rootless mode so container root is not host root
+[x] All capabilities dropped; add back only what is needed
+[x] A read-only root filesystem, with tmpfs for scratch
+[x] Memory and CPU limits, so one container cannot exhaust the host
+[x] Base images pinned by digest and scanned in CI
 ```
 
-## 7. Acronym guide: every term defined {.wide}
+## 9. Glossary {.wide}
 
-```cards cols=4 style=label
-VM & OS | Virtual Machine (hardware-emulated computer) and Operating System (kernel + userland software)
-OCI | Open Container Initiative: Linux Foundation standards body defining open container image and runtime formats
-PID & IPC | Process Identifier and Inter-Process Communication: kernel resources isolated per container via namespaces
-cgroups | Control Groups: Linux kernel subsystem that limits, accounts for and isolates CPU, memory and I/O usage
-CoW & SHA | Copy-on-Write storage layer optimisation and Secure Hash Algorithm cryptographic layer digest
-CPU & RAM | Central Processing Unit and Random-Access Memory shared across host processes
-I/O & SDK | Input/Output (disk and network transfers) and Software Development Kit (compiler toolchain image)
-KVM & CI | Kernel-based Virtual Machine (Linux hypervisor) and Continuous Integration automated build pipeline
+```glossary cols=3
+cgroups | Linux control groups: resource limits
+CoW | Copy-on-write
+KVM | Kernel-based Virtual Machine, Linux's hypervisor
+Namespace | A per-process view of a kernel resource
+OCI | Open Container Initiative: image and runtime standards
+seccomp | A filter on the system calls a process may make
 ```
 
 ## In short {.summary}
 
-Use **Virtual Machines** when you need strong hardware isolation between untrusted workloads or a different OS kernel; use **Containers** for fast, lightweight, reproducible packaging that shares a Linux kernel.
+Use a VM for a hard boundary between untrusted workloads, or another kernel. Use a container for fast, light, reproducible packaging on a shared Linux kernel.
 
 ### Share the kernel, isolate the view
 
-Namespaces hide other processes while `cgroups` cap CPU and RAM without paying hypervisor tax.
+Namespaces hide everything else; cgroups cap what is used. No hypervisor needed.
 
-### Use multi-stage builds
+### Build in stages
 
-Compile in a full toolchain stage, then copy only the static binary into a tiny distroless runtime layer.
+Compile with the toolchain, ship only the binary.
 
-### Never run containers as root
+### Never run as root
 
-Drop all capabilities, mount the root filesystem read-only and run as a non-root user ID.
+Drop capabilities, mount read-only, use a non-root user.

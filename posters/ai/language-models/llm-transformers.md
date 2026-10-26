@@ -1,128 +1,160 @@
 ---
 title: "How Large Language Models and Transformers Work"
-subtitle: Subword tokenisation, high-dimensional vector embeddings, self-attention and autoregressive decoding explained
-byline: Popular Science, Artificial Intelligence & Deep Learning Architecture Explainer
+subtitle: Tokens, embeddings, self-attention and decoding one token at a time
+byline: Artificial intelligence and deep learning explainer
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-037
-version: "1.0"
 colours:
   accent: "#4f46e5"
   secondary: "#3730a3"
 footer:
-  left: Large Language Models & Transformers Explainer
-  centre: AI & Deep Learning Reference
-  right: Tokenisation, Embeddings, Self-Attention, KV Cache & RLHF Guide
+  left: Large Language Models
+  centre: AI Reference
   qr: https://arxiv.org/abs/1706.03762
   qr-label: Attention Is All You Need
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| ~0.75 words | Average English text covered by 1 Byte-Pair Encoding (BPE) token | ~4 characters | good |
-| 140 GB | High-bandwidth Video Random-Access Memory (VRAM) for 70B weights in 16-bit | memory-bound | bad |
-| O(N²) | Compute scaling of full Self-Attention across context length N | quadratic cost | bad |
-| 1 token | Output generated per forward pass during autoregressive decoding | loop step-by-step | good |
+| Value | Label |
+|---|---|
+| 0.75 words | Of English text in one token, on average |
+| 140 GB | Of memory for 70 billion weights at 16 bits |
+| O(N²) | Cost of full attention over a context of N tokens |
+| 1 token | Made by each pass through the network |
 
 ## Introduction {.abstract}
 
-Despite appearing to reason and converse, a decoder-only **Large Language Model (LLM)** performs one mathematical operation at each step. Given a sequence of input tokens `t₁, t₂, ..., tₙ`, the neural network computes a probability distribution over its entire vocabulary (`100,000 to 256,000` subword tokens) for the next token `tₙ₊₁`. The runtime samples one token from that distribution, appends it to the prompt, and runs the network again (**autoregressive decoding**).
+However much it seems to reason, a decoder-only **Large Language Model (LLM)** does one thing at each step. Given the tokens so far, it computes a probability for every token in its vocabulary, 100,000 to 256,000 of them, being the next. The runtime picks one, appends it, and runs the network again: **autoregressive decoding**.
 
-## 1. End-to-end forward pass: from prompt to next token {.wide}
+## 1. One step: from prompt to next token {.wide}
 
-```mermaid
-flowchart LR
-  Text["1. Raw Text Prompt\n'The cat sat on the'"] --> BPE["2. BPE Tokeniser\nSplits into subword integer IDs\n[464, 3797, 3332, 319, 262]"]
-  BPE --> Embed["3. Embedding Lookup + RoPE\nMaps each ID to a 4,096-float\nvector + rotary position angle"]
-  Embed --> Blocks["4. N Transformer Layers (e.g. 80x)\nAlternating Multi-Head Self-Attention\nand Feed-Forward (FFN) blocks"]
-  Blocks --> Logits["5. Output Head & Softmax\nProjects final vector to 128k logits;\nTemperature scales probabilities"]
-  Logits --> Sample["6. Sample & Append\nSelects ' mat' (p = 0.64)\nand loops back for next token!"]
+```flow
+[Text|navy] -tokenise-> [Token IDs|blue] -embed-> [Vectors, 8,192 numbers each|blue] -80 layers-> [Final vector|purple] -project, softmax-> [128k probabilities|amber] -sample-> [" mat"|green]
+The model never sees letters or words. It sees integer IDs, turned into vectors and refined layer by layer. The new token is appended, and the whole step runs again.
 ```
 
-[[CAPTION:Figure]] Models never see raw letters or words: the tokeniser converts text into integer IDs, maps them into a high-dimensional geometric space, and refines them across dozens of layers.
+## 2. Tokens: text as integers
 
-## 2. Inside a single Transformer layer: Attention + `FFN`
+A Byte-Pair Encoding (BPE) tokeniser splits text into common sub-words, each with an ID. A space usually belongs to the word after it.
 
-How does the ambiguous word *"bank"* know whether it means a grassy river edge or a financial institution? Through **Scaled Dot-Product Self-Attention**:
-
-```lcd cols=1
-[Inside Layer L of N — Residual Stream Highway: x_out = x + Attention(x) + FFN(x)]
-
-1. Multi-Head Self-Attention (Routes context BETWEEN token positions):
-   Every token vector projects three learned vectors:
-     - Query (Q): "What context or grammatical partners am I looking for?"
-     - Key   (K): "What kind of information do I contain?"
-     - Value (V): "Here is the semantic payload I pass along if you attend to me."
-   Score = Softmax( (Q * K^T) / sqrt(d_k) + CausalMask ) * V
-
-2. Feed-Forward Network (FFN / SwiGLU — Processes EACH token independently):
-   Acts as a massive learned Key-Value lookup table storing factual associations!
--- Attention moves context across the sentence; FFN looks up facts about that context.
+```tape
+cells: The ␣cat ␣sat ␣on ␣the
+1-1 | 464 | navy
+2-2 | 3797 | blue
+3-3 | 3332 | green
+4-4 | 319 | amber
+5-5 | 262 | purple
 ```
 
-```chart type=bar title="Where parameters live inside a modern 70-billion-parameter model (%)" unit="%" max=100
-Feed-Forward (FFN) | 67
-Attention (QKV+O) | 31
-Embeddings & Head | 2
+Rare words split into several tokens: "tokenisation" may be "token", "isation".
+
+## 3. Attention: how a word finds its context
+
+How does "bank" know whether it means a river edge or a lender? Each token's vector makes a **query** (what am I looking for?), a **key** (what do I contain?) and a **value** (what do I pass on?). Each token takes a mix of the values of earlier tokens, weighted by how well its query matches their keys.
+
+```equation
+title: Scaled dot-product attention
+\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\left( \frac{Q K^{\top}}{\sqrt{d_k}} + M \right) V
+Q, K, V | Queries, keys and values: the tokens' vectors times learned matrices |
+d_k | Size of one key, so the scores do not grow with it |
+M | The causal mask: no token sees a later one |
 ```
 
-## 3. Two inference phases: prefill vs autoregressive decode
+Each layer adds attention and then a **feed-forward network (FFN)** to a running "residual stream". Attention moves information between tokens. The FFN works on each token alone, and holds much of the learned knowledge.
 
-Serving a language model in production splits into two hardware regimes with opposite bottlenecks:
+## 4. Where the 70 billion weights are
+
+```segments
+title: Llama 2 70B, by share of its weights
+82 | Feed-forward networks | 82 % | purple
+17 | Attention | 17.5 % | blue
+1 | Embeddings | 0.8 % | amber
+```
+
+Grouped-query attention shares one key and value among eight queries, so attention is the smaller part.
+
+## 5. Choosing the next token
+
+```chart type=bar title="Next token after 'The cat sat on the'" unit=" %" max=70
+" mat" | 64
+" floor" | 12
+" sofa" | 8
+" bed" | 5
+Everything else | 11
+```
+
+```cards cols=1 style=top
+Temperature | Dividing the scores by T before the softmax sharpens (T below 1) or flattens (T above 1) the choice. T = 0 always takes the top token | blue
+Top-p | Sample only from the smallest set of tokens whose probabilities add up to p, such as 0.9 | navy
+```
+
+## 6. Two phases of serving: prefill and decode
 
 ```compare
-| Phase 1: Prompt Prefill (Parallel) | Phase 2: Token Generation / Decode (Sequential)
-What happens | GPU processes all input prompt tokens simultaneously in one forward pass to populate the **`KV Cache`** | Model generates output tokens **one at a time**; each step reads the entire `KV Cache` plus all `140 GB` of weights
-Hardware bottleneck | **Compute-bound** (limited by matrix-multiplication TeraFLOPS) | **Memory-bandwidth-bound** (limited by how fast `VRAM` streams `140 GB` per token)
-Primary latency metric | **Time To First Token (`TTFT`)**, measured in milliseconds | **Inter-Token Latency (`ITL`)**, measured in tokens per second
+| Prefill | Decode
+What happens | All the prompt's tokens go through the network at once, filling the **KV cache** | One new token per pass. Each pass reads the whole cache and **all 140 GB of weights**
+Limited by | **Compute**: matrix multiplications | **Memory bandwidth**: bytes per second from GPU memory
+Measured as | **Time to first token** (TTFT) | **Inter-token latency** (ITL), or tokens a second
 ```
 
-## 4. The three-stage training pipeline {.wide}
-
-```cards cols=3 style=top
-Stage 1: Self-Supervised Pre-Training | Clusters of thousands of accelerators train for months on `10 to 15 trillion` web, code and book tokens using next-token cross-entropy loss. This produces a **Base Model** that completes documents and absorbs world knowledge, but does not follow user instructions reliably | blue
-Stage 2: Supervised Fine-Tuning (`SFT`) | Engineers train the base model on `100k to 1M` curated `(User Prompt, Ideal Assistant Response)` conversations. This teaches conversational turn-taking, formatting and instruction following | green
-Stage 3: Preference Alignment (`RLHF` / `DPO`) | Human raters or verifier models score candidate answers. **Reinforcement Learning from Human Feedback (RLHF)** or **Direct Preference Optimisation (DPO)** shifts probability mass toward helpful, truthful and safe completions, while reasoning models train with verifiable maths and code rewards | purple
+```chart type=bar title="Memory for 70 billion weights" unit=" GB" max=160
+16-bit (FP16) | 140
+8-bit (INT8) | 70
+4-bit (INT4) | 35
 ```
 
-## 5. Sampling, context windows and `RAG` {style=card colour=blue}
+Quantising to 4 bits cuts memory four-fold, and speeds up decode by the same factor of bytes read.
+
+## 7. Practical rules {style=card colour=blue}
 
 ```checklist
-[x] **Temperature (`T`) controls randomness**: Dividing logits by `T = 0` always picks the single top token (greedy); `T = 0.7 to 1.0` flattens probabilities for creative writing
-[x] **Key-Value (`KV`) Cache saves compute**: Storing past tokens' `K` and `V` tensors in `VRAM` avoids recomputing the entire prompt on every generated word
-[x] **Quantisation (`FP16 -> INT8 / INT4`)**: Compressing 16-bit weights to 4-bit integers cuts memory footprint 4-fold and speeds up memory-bound token generation
-[x] **Retrieval-Augmented Generation (`RAG`)**: Injecting verified search snippets directly into the prompt grounds answers in live facts and slashes hallucinations
+[x] **Cache keys and values**: the KV cache saves recomputing the whole prompt for every token
+[x] **Quantise for local use**: 4-bit weights fit a 70B model on one large GPU
+[x] **Ground answers with retrieval (RAG)**: put trusted passages in the prompt to cut made-up facts
+[x] **Mind the context window**: attention cost grows with the square of its length
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 8. Training in three stages {.wide}
 
-```cards cols=4 style=label
-LLM & BPE | Large Language Model (neural network trained on text) and Byte-Pair Encoding (subword tokenisation algorithm)
-QKV & FFN | Query, Key and Value vectors (self-attention lookup projections) and Feed-Forward Network (multi-layer perceptron storing facts)
-RoPE & SwiGLU | Rotary Position Embedding (encodes relative token distance via angle rotation) and Swish-Gated Linear Unit (`FFN` activation)
-KV Cache & VRAM | Key-Value Activation Cache (stores past token states during decoding) and Video Random-Access Memory (high-bandwidth GPU memory)
-SFT & RLHF | Supervised Fine-Tuning (instruction imitation stage) and Reinforcement Learning from Human Feedback (alignment training stage)
-DPO & RAG | Direct Preference Optimisation (reward-free alignment loss) and Retrieval-Augmented Generation (grounding prompts with external search)
-TTFT & ITL | Time To First Token (prompt prefill latency) and Inter-Token Latency (streaming generation speed in tokens per second)
-FP16 & INT4 | 16-bit Floating Point (`2 bytes` per weight) and 4-bit Integer quantisation (`0.5 bytes` per weight for fast local inference)
+```cards cols=3 style=top
+1. Pre-training | Months on thousands of accelerators, predicting the next token over 10 to 15 trillion tokens of web, code and books. The result is a base model: it completes documents, but does not follow instructions | blue
+2. Supervised fine-tuning (SFT) | Training on 100,000 to a million written conversations, each a prompt and an ideal reply, teaches turn-taking, format and following instructions | green
+3. Preference tuning (RLHF, DPO) | People or models score pairs of answers, and training moves probability towards the better ones. Reasoning models also learn from maths and code with answers that can be checked | purple
+```
+
+## 9. Glossary {.wide}
+
+```glossary cols=4
+BPE | Byte-Pair Encoding, the usual tokeniser
+DPO | Direct Preference Optimisation
+FFN | Feed-forward network, two or three matrix multiplications
+GQA | Grouped-query attention
+KV cache | The stored keys and values of earlier tokens
+LLM | Large Language Model
+RAG | Retrieval-Augmented Generation
+RLHF | Reinforcement Learning from Human Feedback
+RoPE | Rotary position embedding: position as an angle
+SFT | Supervised fine-tuning
+TTFT, ITL | Time to first token, inter-token latency
+VRAM | The GPU's own high-bandwidth memory
 ```
 
 ## In short {.summary}
 
-A Transformer converts subword **tokens** into high-dimensional **vectors** and uses **Self-Attention (`Q, K, V`)** to route context between words. It then uses **Feed-Forward Networks (`FFN`)** to look up learned facts and predicts one token at a time via **autoregressive decoding**.
+A Transformer turns tokens into vectors, lets attention move context between them, and predicts one token at a time.
 
-### Vectors encode meaning as geometry
+### Meaning is geometry
 
-In a 4,096-dimensional embedding space, words with similar meanings point in similar geometric directions (`King - Man + Woman ≈ Queen`).
+Words used alike have vectors that point alike, thousands of numbers long.
 
-### Attention is content-addressable lookup
+### Attention is a lookup by content
 
-Self-attention lets every word dynamically query every earlier word in the context window, resolving pronouns and ambiguity in parallel.
+Every token queries every earlier token at once, which resolves pronouns and ambiguity.
 
-### Decoding is a memory-bandwidth race
+### Decoding is a memory race
 
-Because generating a single word requires reading billions of model weights from memory, token generation speed depends on `VRAM` bandwidth (`TB/s`), not raw compute.
+Each token reads every weight once, so its speed is set by memory bandwidth, not compute.

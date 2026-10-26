@@ -1,156 +1,147 @@
 ---
 title: "Domain-Driven Design: Contexts and Aggregates"
-subtitle: Aligning software boundaries, ubiquitous language and transactional consistency with real business domains
-byline: Strategic & Tactical Software Architecture Explainer
+subtitle: Aligning software boundaries, language and consistency with the business they serve
+byline: Software architecture
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-030
-version: "1.0"
 colours:
   accent: "#0f766e"
   secondary: "#115e59"
 footer:
-  left: Domain-Driven Design (DDD) Explainer
+  left: Domain-Driven Design
   centre: Software Architecture Reference
-  right: Bounded Contexts, Aggregates & Domain Events Guide
   qr: https://www.domainlanguage.com/ddd/
-  qr-label: Domain-Driven Design
+  qr-label: Domain Language
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 1 language | Shared Ubiquitous Language spoken by domain experts and written in code | zero translation | good |
-| 1 boundary | Bounded Context within which every domain term has a single unambiguous meaning | stops God models | good |
-| 1 Aggregate | Transactional consistency boundary modified in a single atomic database operation | protects invariants | good |
-| Immutable | Value Objects (`Money`, `Temperature`, `GpsCoord`) have no ID and never mutate | bug-proof values | good |
+| Value | Label |
+|---|---|
+| 1 language | Spoken by the experts and written in the code |
+| 1 meaning | For each term, inside a bounded context |
+| 1 aggregate | Changed in each transaction |
+| No ID | Value objects: equal when their values are equal, and never changed |
 
 ## Introduction {.abstract}
 
-Large software systems rarely fail because of slow algorithms. They fail when a single bloated `Device` or `Customer` class tries to serve billing, fleet telemetry, manufacturing and support all at once. Introduced by Eric Evans, **Domain-Driven Design (DDD)** attacks complexity on two levels. **Strategic Design** partitions a large system into explicit **Bounded Contexts** protected by **Anti-Corruption Layers (ACLs)**. **Tactical Design** models complex rules inside each context using **Entities**, **Value Objects**, **Aggregates** and **Domain Events**.
+Large systems rarely fail because an algorithm is slow. They fail when one bloated `Device` class tries to serve billing, telemetry, manufacturing and support at once. Eric Evans's **Domain-Driven Design (DDD)** works at two levels. **Strategic design** splits the system into **bounded contexts**, guarded where needed by **anti-corruption layers**. **Tactical design** models the rules inside each with **entities**, **value objects**, **aggregates** and **domain events**.
 
-## 1. Strategic design: bounded contexts and ubiquitous language {.wide}
+## 1. One word, three meanings {.wide}
 
-Trying to force one unified `Device` database schema across an entire company creates a fragile monolith. Instead, recognise that the word **"Device"** means something completely different in each **Bounded Context**:
+A single company-wide `Device` schema becomes a fragile monolith. The word means something different in each **bounded context**:
 
 ```cards cols=3 style=top
-1. Manufacturing & Provisioning Context | Here, a **"Device"** is a printed circuit board serial number, factory test log, hardware revision and X.509 Certificate Signing Request (`CSR`). It does not care about monthly billing plans! | navy
-2. Fleet Telemetry & Control Context | Here, a **"Device"** is an active LwM2M/MQTT endpoint with a battery voltage, radio signal strength, firmware version and sensor time-series stream | teal
-3. Commercial & Billing Context | Here, a **"Device"** is a billable subscription line item tied to a customer account, data-plan quota and invoice cycle | blue
+Manufacturing | A board serial number, a test log, a hardware revision and a certificate request. Billing plans mean nothing here | navy
+Fleet telemetry | A live LwM2M or MQTT endpoint, with battery voltage, signal strength, firmware version and a stream of readings | teal
+Billing | A subscription line on a customer account, with a data quota and an invoice cycle | blue
 ```
+
+## 2. The context map
 
 ```mermaid
 flowchart LR
-  subgraph Mfg ["Bounded Context: Factory Provisioning"]
-    MModel["HardwareUnit Aggregate\n(PCB Serial, Wafer ID, Cert)"]
-  end
-  subgraph Fleet ["Bounded Context: Fleet Telemetry"]
-    FModel["ConnectedNode Aggregate\n(Endpoint ID, PSM Timer, FOTA)"]
-  end
-  subgraph Legacy ["External / Legacy ERP System"]
-    ERP["Messy Legacy Tables"]
-  end
-  Mfg -- "Domain Event:\nUnitProvisionedEvent" --> Fleet
-  Legacy --> ACL["Anti-Corruption Layer (ACL)\nTranslates legacy schemas so\nthey never pollute Fleet model!"]
-  ACL --> Fleet
+  Mfg["Factory provisioning<br/>HardwareUnit aggregate"] -- "UnitProvisioned event" --> Fleet["Fleet telemetry<br/>ConnectedNode aggregate"]
+  ERP["Legacy ERP"] --> ACL["Anti-corruption layer<br/>translates its model"] --> Fleet
+  Fleet -- "NodeActivated event" --> Bill["Billing<br/>Subscription aggregate"]
 ```
 
-[[CAPTION:Figure]] Bounded Contexts communicate via explicit Domain Events or an Anti-Corruption Layer (`ACL`) so legacy models never leak inside clean domain code.
+Contexts talk through **domain events**, or through an **anti-corruption layer** that keeps a legacy model from leaking in.
 
-## 2. Tactical building blocks: Entities vs Value Objects
+## 3. Where to invest
 
-Inside a Core Domain, stop representing everything as primitive integers and strings (**Primitive Obsession**):
+Not every part of a system deserves careful modelling. Plot each **subdomain**:
 
-```compare
-| Identity & Equality | Mutability | Typical Examples
-**Value Object** | **By structural value** (no ID field; two `21.5 °C` objects are equal) | **Strictly Immutable** (operations return a new instance) | `Temperature`, `Money`, `MacAddress`, `FirmwareVersion`, `GpsCoordinate`
-**Entity** | **By unique Identifier (`ID`)** (persists across state changes over time) | Mutable state governed by domain methods | `SensorNode`, `MaintenanceTicket`, `FirmwareCampaign`, `Customer`
-**Aggregate** | Cluster of Entities & Value Objects under **one Aggregate Root Entity** | Modified as **one atomic unit**; enforces invariants | `Order` (Root + `OrderLines`), `RolloutCampaign` (Root + `BatchTargets`)
-**Domain Event** | Immutable record of a fact that **already happened** in the past tense | **Strictly Immutable** (`timestamp` + `id` + payload) | `OverheatThresholdBreached`, `FirmwareRolloutCompleted`
+```mermaid
+quadrantChart
+  title Subdomains of a fleet platform
+  x-axis Commodity --> Differentiating
+  y-axis Simple rules --> Complex rules
+  quadrant-1 Core, model with DDD
+  quadrant-2 Buy or adopt
+  quadrant-3 Generic, buy it
+  quadrant-4 Supporting, keep it simple
+  Fleet telemetry: [0.85, 0.85]
+  Firmware rollout: [0.75, 0.7]
+  Provisioning: [0.6, 0.35]
+  Billing: [0.25, 0.55]
+  Login: [0.1, 0.2]
+  Email: [0.15, 0.1]
 ```
 
-## 3. The four rules of Aggregate design
-
-An **Aggregate** is a consistency boundary that guarantees business invariants (for example: *"A rollout campaign cannot activate with an unverified firmware signature"*):
+## 4. Four rules for aggregates
 
 ```steps
-1. Protect true invariants inside one Root | External code may only hold a reference to the **Aggregate Root**; internal child entities are modified solely by calling methods on the Root (never via public setters!)
-2. Design small Aggregates | Keep Aggregates limited to the Root Entity plus the minimum Value Objects needed to check immediate invariants; huge Aggregates cause database lock contention | teal
-3. Reference other Aggregates by ID only | Never embed a direct object pointer to another Aggregate (`use RolloutId`, not `Rollout*`); this keeps Aggregates independently loadable and scalable | blue
-4. Use Eventual Consistency across Aggregates | Update **one Aggregate per database transaction**. When other Aggregates or Bounded Contexts need to react, publish a **Domain Event** (`Outbox Pattern`) | green
+Protect rules inside one root | Outside code holds only the root; children change only through the root's methods
+Keep them small | The root and only what its rules need: large aggregates contend for locks | teal
+Refer to others by ID | Hold a RolloutId, never a pointer to another aggregate | blue
+One aggregate per transaction | Others catch up through domain events, published with an outbox | green
 ```
 
-## 4. Rich domain model vs Anaemic Domain Model
+## 5. The building blocks {.wide}
 
-Avoid the **Anaemic Domain Model** anti-pattern (structs with public getters/setters and all rules scattered across procedural `Manager` / `Helper` classes):
+```compare
+| Identity | Change | Examples
+**Value object** | **Its values**: two 21.5 °C objects are equal | **Never changes**: operations return a new one | Temperature, Money, MacAddress, FirmwareVersion
+**Entity** | **An ID** that lasts while its state changes | Changed through domain methods | SensorNode, MaintenanceTicket, Customer
+**Aggregate** | Entities and values under **one root entity** | **Changed as one unit**, which keeps its rules true | RolloutCampaign and its target batches
+**Domain event** | A fact that **has happened**, in the past tense | **Never changes** | OverheatThresholdBreached, RolloutCompleted
+```
 
-```lcd cols=1
-// ANAEMIC ANTI-PATTERN (Invariants bypassed by callers!):
-device.set_status(STATUS_OTA_ACTIVE); // Forgot to check battery > 30%!
+## 6. Anaemic or rich {.wide}
 
-// RICH AGGREGATE ROOT (Ubiquitous Language + enforced invariant):
-Result<OtaStartedEvent, DomainErr>
-ConnectedNode::start_firmware_update(FirmwareImage img, Percent min_batt) {
-  if (this->battery_level < min_batt) {
-    return Err(DomainErr::BatteryTooLowForOta);
-  }
-  if (!img.is_compatible_with(this->hardware_rev)) {
-    return Err(DomainErr::IncompatibleHardwareRevision);
-  }
-  this->state = NodeState::DownloadingOta(img.version());
-  return Ok(OtaStartedEvent{ this->node_id, img.version() });
+```code-compare
+@bad An anaemic model: anyone can set anything
+device.set_status(STATUS_OTA_ACTIVE);          <1>
+@good A rich aggregate root: the rule lives with the data
+Result<OtaStarted, DomainError>
+ConnectedNode::start_update(const FirmwareImage &img, Percent min_battery) {
+    if (battery_ < min_battery)            return DomainError::BatteryTooLow;
+    if (!img.fits(hardware_revision_))     return DomainError::WrongHardware;   <2>
+    state_ = NodeState::Downloading(img.version());
+    return OtaStarted{id_, img.version()};                                      <3>
 }
--- It is impossible to put ConnectedNode into an invalid state!
+-- 1 | Nothing checked the battery first
+-- 2 | Every rule is checked in one place, in the language of the domain
+-- 3 | The change is announced as an event, for other contexts
 ```
 
-## 5. Matching architecture to subdomain value
-
-Not every service in your system deserves heavy tactical DDD modelling. Classify each **Subdomain** first:
-
-| Subdomain Type | Business Differentiation | Recommended Architecture |
-|---|---|---|
-| **Core Subdomain** | Your company's secret sauce & competitive edge | **Full Tactical DDD** (Aggregates, Value Objects, Clean/Hexagonal Architecture) |
-| **Supporting Subdomain** | Custom to your business, but simple rules | **Simple Transaction Script** or Active Record (`CRUD` service) |
-| **Generic Subdomain** | Solved problem (Auth, Billing, Email, Logging) | **Buy SaaS or use off-the-shelf open-source** (never build from scratch!) |
-
-## 6. Domain-driven design checklist {style=card colour=teal}
+## 7. Checklist {cols=2 style=card colour=teal}
 
 ```checklist
-[x] Maintain a living **Glossary of Ubiquitous Language**; rename classes and methods in code whenever domain terminology evolves
-[x] Draw a **Context Map** showing every Bounded Context and whether upstream/downstream integration uses Events or an `ACL`
-[x] Replace raw primitive parameters (`float temp, int unit`) with self-validating immutable **Value Objects** (`Temperature::from_celsius(21.5)`)
-[x] Delete public `set_*()` methods on Aggregate Roots; expose only intention-revealing domain commands (`approve()`, `abort_rollout()`)
-[x] Publish **Domain Events** via a transactional **Outbox table** so database commits and message-broker publishes never drift out of sync
+[x] A living glossary of the ubiquitous language; rename code when the language changes
+[x] A context map: every context, and whether it integrates by events or through an ACL
+[x] Value objects instead of bare floats and ints: `Temperature::from_celsius(21.5)`
+[x] No public setters on roots: only commands such as `approve()` and `abort_rollout()`
+[x] Domain events published through an outbox table, in the same transaction
 ```
 
-## 7. Acronym guide: every term defined {.wide}
+## 8. Glossary
 
-```cards cols=4 style=label
-DDD | Domain-Driven Design: software design approach centring architecture on the core business domain and its language
-ACL | Anti-Corruption Layer: translation boundary that prevents a messy external or legacy system's concepts from leaking into your domain
-CRUD | Create, Read, Update and Delete: simple data-centric storage operations suitable for Supporting Subdomains without complex invariants
-CQRS | Command Query Responsibility Segregation: separating write models (Aggregates validating commands) from optimised read views
-ES | Event Sourcing: persisting an Aggregate's state as an append-only log of immutable Domain Events rather than overwriting rows
-DTO & ORM | Data Transfer Object (wire struct) and Object-Relational Mapping (database persistence framework kept in Repositories)
-ERP & SaaS | Enterprise Resource Planning (legacy back-office system) and Software as a Service (off-the-shelf Generic Subdomain)
-API | Application Programming Interface: published contract between Bounded Contexts
+```glossary cols=1
+ACL | Anti-corruption layer
+CQRS | Separate models for commands and queries
+CRUD | Create, read, update, delete: enough for simple subdomains
+Event sourcing | Storing an aggregate as its log of events
+Outbox | A table written in the transaction, then published
+Ubiquitous language | The shared words of experts and code
 ```
 
 ## In short {.summary}
 
-Split big systems into **Bounded Contexts** speaking a shared **Ubiquitous Language**. Protect clean models with an **Anti-Corruption Layer (`ACL`)**, and guard invariants inside small **Aggregates** built from immutable **Value Objects**.
+Split big systems into bounded contexts with their own language, protect them with anti-corruption layers, and keep rules inside small aggregates built from value objects.
 
-### Stop building one giant model
+### Stop building one model
 
-A single `Device` or `User` class shared by ten teams satisfies no one; give each Bounded Context its own focused model.
+A `Device` shared by ten teams suits none of them.
 
-### Make illegal states unrepresentable
+### Make bad states impossible
 
-When `Temperature`, `Voltage` and `NodeId` are distinct Value Objects instead of raw `float` and `int`, the compiler prevents swapping arguments.
+Distinct types for temperature, voltage and node ID stop arguments being swapped.
 
 ### Tell, don't ask
 
-Never pull fields out of an Entity to make a decision in a helper function; call a domain method on the Aggregate Root and let it guard its own rules.
+Call a method on the aggregate, and let it guard its own rules.

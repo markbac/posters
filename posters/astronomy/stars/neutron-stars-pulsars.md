@@ -1,139 +1,139 @@
 ---
 title: "Neutron Stars, Pulsars, Magnetars and Fast Radio Bursts"
-subtitle: Nuclear pasta crusts, Jocelyn Bell Burnell's lighthouse pulsars, 10¹¹-Tesla magnetars and millisecond cosmic clocks
-byline: Popular Astrophysics, Relativistic Compact Objects & Radio Astronomy Explainer
+subtitle: Nuclear pasta, cosmic lighthouses, the strongest magnets in the universe, and millisecond radio flashes
+byline: Popular astrophysics explainer
 orientation: landscape
-columns: 3
+columns: 4
 paper: a1
 width: 1750
 document_number: PO-047
-version: "1.0"
 colours:
   accent: "#0891b2"
   secondary: "#155e75"
 footer:
-  left: Neutron Stars, Pulsars & Magnetars Explainer
+  left: Neutron Stars and Pulsars
   centre: Popular Astrophysics Reference
-  right: Nuclear Pasta, Lighthouse Model, Millisecond Pulsars & FRB Guide
   qr: https://en.wikipedia.org/wiki/Neutron_star
-  qr-label: Neutron Star Physics
+  qr-label: Neutron stars on Wikipedia
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| ~20 km | Diameter of a Neutron Star packing 1.4 to 2.2 Solar Masses of matter! | city-sized nucleus | good |
-| 716 Hz | Fastest known Pulsar spin rate (spinning 716 times every second!) | 24% speed of light! | good |
-| 10¹¹ Tesla | Magnetic field of a Magnetar (1,000 trillion times stronger than Earth's!) | warps electron clouds | bad |
-| 10¹² m/s² | Surface gravity (100 billion g — dropping a marshmallow hits like an A-bomb!) | bends light 30%+ | bad |
+| Value | Label |
+|---|---|
+| 20 km | Across a neutron star of 1.4 to 2.2 Suns |
+| 716 turns a second | The fastest pulsar known: its surface moves at a fifth of light speed |
+| 10¹¹ T | A magnetar's field: 10¹⁵ times Earth's |
+| 400 million tonnes | A sugar cube of neutron star |
 
 ## Introduction {.abstract}
 
-When a massive star (`8 to 25 solar masses`) runs out of nuclear fuel, gravity crushes its iron core so hard that protons and electrons merge into neutrons (`p + e⁻ -> n + ν_e`). Over **1.5 Suns of mass** collapse into a sphere the size of **central London (`~20 km`)**. Held up only by **quantum neutron degeneracy pressure** and the repulsive strong nuclear force, a **Neutron Star** is the densest visible matter in the cosmos. Because the collapsing core conserves **angular momentum** and **magnetic flux**, it emerges spinning hundreds of times per second (**Pulsar**) with a trillion-Gauss magnetic field (**Magnetar**).
+When a star of 8 to 25 Suns runs out of fuel, gravity crushes its iron core until protons and electrons merge into **neutrons**. More than a Sun's mass ends up in a ball the size of a city, held up by **neutron degeneracy pressure** and the strong force. The collapse keeps the core's spin and magnetic field, so it is born spinning fast as a **pulsar**, and sometimes with an enormous field, as a **magnetar**.
 
-## 1. Peeling the onion of a `20 km` Neutron Star {.wide}
+## 1. Inside a neutron star
 
-What happens to matter squeezed to **`4 × 10¹⁴ g/cm³`** (twice the density of an atomic nucleus)? Between the solid iron crust and the superfluid core, competing nuclear attraction and Coulomb repulsion twist nuclei into **Nuclear Pasta**—the strongest material in the universe (`10 billion times` stronger than steel!):
-
-```figure
-@segments
-title: Cross-section from a Neutron Star's surface to its centre (Total radius R ≈ 10 to 12 kilometres!)
-1 | 1. Atmosphere (10 cm!) & Iron-56 Outer Crust (0.5 km): Ultrathin carbon/iron plasma | Solid Lattice | blue
-2 | 2. Inner Crust (1 km): Free superfluid neutrons drip out of nuclei ('Neutron Drip') | Superfluid | teal
-2 | 3. Nuclear Pasta Mantle (1 km): Nuclei deform into Gnocchi -> Spaghetti -> Lasagna sheets! | 10¹⁰× Steel! | amber
-3 | 4. Outer Core (6 km): Frictionless Neutron Superfluid + Proton Superconductor (95% n, 5% p+e) | Quantum Liquid | purple
-2 | 5. Unknown Inner Core (0–3 km): Hyperons, Bose-Einstein Pion/Kaon Condensate or Quark-Gluon Plasma? | NICER / LIGO test! | red
+```cutaway type=sphere unit=" km"
+Inner core | 3 | Hyperons, or free quarks? | red
+Outer core | 10.5 | Superfluid neutrons, superconducting protons | purple
+Nuclear pasta | 11 | Nuclei squeezed into rods and sheets | amber
+Inner crust | 11.5 | Neutrons drip out of nuclei | teal
+Outer crust | 12 | A lattice of iron nuclei | blue
 ```
 
-## 2. How pulsars work: the cosmic lighthouse model
+At 4 × 10¹⁴ g/cm³, nuclei deform into "gnocchi", "spaghetti" and "lasagne": **nuclear pasta**, perhaps the strongest material there is. NICER and LIGO are measuring the radius, to learn what the inner core is.
 
-In November 1967, graduate student **Jocelyn Bell Burnell** spotted a radio source pulsing every **`1.3373011 seconds`** with atomic-clock precision (nicknamed **`LGM-1`** for *"Little Green Men"*!). She had discovered the first **Pulsar**:
+## 2. A cosmic lighthouse
 
-```lcd cols=1
-           ^ Rotation Axis (Omega)
-           |      //  / <-- Narrow Radio / X-Ray Synchrotron Beam
-           |     //  /      (Sweeps across Earth once per rotation!)
-       .---|---.//  /
-     /     |   // \/  Magnetic Axis (Tilted by angle alpha from Spin Axis!)
-    |   (N)|  *   |
-    |  [20 km NS] |   <-- Closed Magnetosphere (Co-rotates out to Light Cylinder R = c/Omega)
-     \     | (S) /
-       '---|---'
-          / //
-         / //  <-- South Magnetic Pole Beam
+In 1967 **Jocelyn Bell Burnell** found a radio source pulsing every **1.3373 s**, steady as a clock. Its beams come from the magnetic poles, tilted from the spin axis, and sweep past Earth once a turn.
 
-Why newborn Neutron Stars spin so fast (Conservation of Angular Momentum: L = I * Omega):
-  - An iron core 10,000 km wide spinning once every 10 hours collapses to 20 km wide (500x smaller R)
-  - Moment of inertia (I ∝ R^2) drops by 250,000x -> Spin speed jumps to 10–100 rotations/second!
+```instrument type=scope vdiv=1 tdiv="0.5 s" title="PSR B1919+21, the first pulsar"
+Radio | blue | 0 0 0.2 3.2 0.3 0 0 0 0.1 0 0 0.2 2.6 0.2 0 0 0 0 0 0.3 3.5 0.2 0 0 0 0
 ```
 
-```chart type=bar title="Magnetic field strength across the cosmos (log10 Tesla)" unit=" log T" max=13
-Earth Dipole | 0
-Hospital MRI | 1
-Sunspot / Lab | 2
-White Dwarf | 4
-Radio Pulsar | 8
-Magnetar! | 11
+```equation
+title: Why it spins so fast
+I_1 \omega_1 = I_2 \omega_2, \qquad I \propto M R^2
+I | Moment of inertia |
+\omega | Rate of spin | rad/s
+R | Radius: from thousands of km to 12 | km
 ```
 
-## 3. Magnetars, starquakes and Fast Radio Bursts (`FRBs`)
+## 3. Magnetic fields
 
-Since 2007 (**Lorimer Burst**), radio telescopes like **`CHIME`** have detected thousands of millisecond flashes of radio waves from distant galaxies. Each flash releases as much energy in **one millisecond** as the Sun emits in **three days**:
-
-```mermaid
-flowchart LR
-  Twist["1. Magnetar Internal Field Twist\n10^11 Tesla magnetic field stresses\nthe solid 1 km Iron/Pasta crust\nbeyond its breaking point!"] --> Quake["2. Crustal Starquake!\nCrust cracks by a few millimetres;\nLaunches relativistic Alfvén waves\nand e+/e- fireball into magnetosphere"]
-  Quake --> Shock["3. Coherent Synchrotron Maser / Reconnection\nShockwave slams into magnetar wind;\nGenerates intense millisecond coherent\nradio flash (Fast Radio Burst, FRB)!"]
-  Shock --> Dispersion["4. Intergalactic Dispersion Delay\nHigh radio frequencies arrive at Earth\nseconds before low frequencies;\nMeasures missing baryons across cosmos!"]
+```logscale unit=" T"
+5e-5 | Earth | green
+3 | Hospital MRI | blue
+45 | Strongest lab magnet | navy
+1e5 | White dwarf | grey
+1e8 | Radio pulsar | teal
+1e11 | Magnetar | red
 ```
 
-[[CAPTION:Figure]] In April 2020, the `CHIME` and `STARE2` telescopes caught an intense **Fast Radio Burst (`FRB 200428`)** erupting from a known **Magnetar (`SGR 1935+2154`)** right inside our own Milky Way—proving that Magnetar starquakes power `FRBs`!
+## 4. Fast radio bursts
 
-## 4. Mind-bending neutron star rules of thumb {style=card colour=teal}
+Since 2007, telescopes such as **CHIME** have found thousands of millisecond radio flashes from other galaxies, each giving out in a millisecond what the Sun does in days.
 
-```checklist
-[x] **Gravitational Light Bending reveals the back of the star**: Gravity is so intense (`v_esc ≈ 0.5 c`) that light from the *far side* bends around the limb—so an observer sees **more than 70% of the surface at once**!
-[x] **Pulsar Glitches probe superfluid quantum mechanics**: When the solid crust slows down, trillions of quantised vortices in the inner neutron superfluid suddenly unpin and transfer momentum—jerking the spin period faster by `1 part in 10⁶`
-[x] **First Exoplanets Ever Found (`PSR B1257+12`, 1992)**: Aleksander Wolszczan and Dale Frail discovered the very first confirmed exoplanets (`Draugr`, `Poltergeist`, `Phobetor`) by timing microsecond wobbles in a millisecond pulsar!
-[x] **Dispersion Measure (`DM`) weighs the universe**: Because intergalactic electrons slow down lower radio frequencies in an `FRB`, measuring the sweep delay counts every free electron between distant galaxies and Earth!
+```flow
+[Twisted field|purple] -stresses the crust-> [Starquake|red] -fireball, shock-> [Radio flash|amber]
 ```
 
-## 5. Comparing the four neutron star families {.wide}
+In April 2020, **FRB 200428** came from the magnetar SGR 1935+2154, in our own galaxy: proof that magnetars make at least some of them.
+
+```equation
+title: Dispersion: low frequencies arrive late
+\Delta t \approx 4.15 \text{ ms} \times \mathrm{DM} \times \left( \nu_{\text{lo}}^{-2} - \nu_{\text{hi}}^{-2} \right)
+\mathrm{DM} | Electrons along the way | pc/cm³
+\nu | Frequency | GHz
+```
+
+The delay counts every free electron between us and the burst.
+
+## 5. Four families of neutron star {.wide}
 
 ```compare
-| Normal Rotation-Powered Pulsars | Millisecond ("Recycled") Pulsars (`MSP`) | Magnetars (`SGR` & `AXP`) | X-Ray Binaries & Kilonova Mergers
-Spin period (`P`) | **`0.03 to 5 seconds`** (`Crab Pulsar = 33 ms`) | **`1.4 to 10 milliseconds`** (`100 to 716 rotations/sec`!) | **Slow (`2 to 12 seconds`)**—braked rapidly by huge magnetic torque! | Milliseconds to seconds (or spiralling together at `100+ Hz`)
-Magnetic field (`B`) | **`10⁷ to 10⁹ Tesla`** (`10¹¹ to 10¹³ Gauss`) | **Weaker (`10⁴ to 10⁵ Tesla`)** | **Extreme (`10¹⁰ to 10¹¹ Tesla` / `10¹⁵ Gauss`)** | `10⁴ to 10⁸ Tesla`
-What powers the glow? | **Rotational kinetic energy** (`P` gradually slows down over `10–100M yrs`) | **Binary accretion spin-up**: an old pulsar strips gas from a companion star! | **Decay & twisting of the ultra-strong magnetic field** (`Starquakes`!) | Matter falling from a companion star (`X-ray bursts`) or **Neutron Star merger**
-Precision & phenomena | Occasional sudden spin-ups (**"Glitches"**) when superfluid vortices unpin | **Rivals atomic clocks!** Used in **Pulsar Timing Arrays** to detect gravitational waves | Giant gamma-ray flares (`SGR 1806-20` ionised Earth's upper atmosphere from `50,000 ly`!) | **`GW170817`** merger proved colliding neutron stars forge the universe's **Gold & Platinum**!
+| Ordinary pulsars | Millisecond pulsars | Magnetars | X-ray binaries and mergers
+Spin | **0.03 to 5 s**: the Crab spins in 33 ms | **1.4 to 10 ms** | **2 to 12 s**: braked by their own field | Milliseconds to seconds
+Magnetic field | **10⁷ to 10⁹ T** | 10⁴ to 10⁵ T | **10¹⁰ to 10¹¹ T** | 10⁴ to 10⁸ T
+What powers them | **Their spin**, which slows over millions of years | **Spun up** by gas pulled from a partner | **Their decaying field**: starquakes and flares | Gas from a partner, or a **merger**
+Known for | **Glitches**: sudden spin-ups | **As steady as atomic clocks**: pulsar timing arrays | A 2004 flare from SGR 1806-20 disturbed Earth's ionosphere | **GW170817** made gold and platinum
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 6. Things only a neutron star does {style=card colour=teal}
 
-```cards cols=4 style=label
-NS & TOV Limit | Neutron Star (`~1.4 to 2.2 M☉` collapsed stellar core) and Tolman-Oppenheimer-Volkoff mass limit (above which it becomes a Black Hole)
-PSR & MSP | Pulsating Source of Radio (Pulsar) and Millisecond Pulsar (ancient pulsar spun up to `100–716 Hz` by accreting matter from a binary partner)
-SGR & AXP | Soft Gamma Repeater and Anomalous X-ray Pulsar: the two observational classes of ultra-magnetised neutron stars (**Magnetars**)
-FRB & DM | Fast Radio Burst (millisecond extragalactic radio flash) and Dispersion Measure (frequency-dependent arrival delay through cosmic plasma)
-LGM-1 & Crab | "Little Green Men 1" (`PSR B1919+21`, first pulsar found by Jocelyn Bell Burnell in 1967) and the `33 ms` Crab Nebula Pulsar (from the `1054 AD` supernova)
-NICER | Neutron star Interior Composition Explorer: NASA X-ray telescope mounted on the International Space Station measuring neutron star radii
-CHIME | Canadian Hydrogen Intensity Mapping Experiment: stationary half-pipe radio telescope in British Columbia that discovered thousands of `FRBs`
-PTA & NanoGrav | Pulsar Timing Array and North American Nanohertz Observatory for Gravitational Waves (uses millisecond pulsars as a galaxy-sized detector)
+```cards cols=1 style=label
+You see its back | Gravity bends light round it, so more than three-quarters of the surface is visible at once
+Glitches | Vortices in the superfluid inside unpin and speed the crust up, by about a millionth
+The first exoplanets | In 1992, Wolszczan and Frail found planets round pulsar PSR B1257+12 from tiny shifts in its timing
+```
+
+## 7. Gravity and pulsars
+
+Pulsar timing arrays watch dozens of millisecond pulsars across the galaxy. In 2023 they found a slow background of gravitational waves, likely from pairs of supermassive black holes.
+
+## 8. Glossary
+
+```glossary cols=1
+DM | Dispersion measure
+FRB | Fast radio burst
+MSP | Millisecond pulsar
+NICER | NASA's X-ray telescope on the ISS that measures neutron stars
+PTA | Pulsar timing array
+SGR, AXP | Soft gamma repeater and anomalous X-ray pulsar: magnetars
+TOV limit | The heaviest a neutron star can be, about 2.2 to 2.9 Suns
 ```
 
 ## In short {.summary}
 
-A **Neutron Star** packs the mass of the Sun into a `20 km` ball of **superfluid neutrons** and **nuclear pasta**. Tilted magnetic beams turn spinning neutron stars into lighthouse **Pulsars** that rival atomic clocks, while binary accretion spins them up into `700 Hz` **Millisecond Pulsars**. Meanwhile, `10¹¹-Tesla` **Magnetars** unleash starquakes seen across the universe as **Fast Radio Bursts (`FRBs`)**.
+A neutron star packs more than the Sun into 20 km of superfluid neutrons and nuclear pasta. Its beams make it a pulsar, a partner can spin it up to hundreds of turns a second, and its magnetic field can shake it into fast radio bursts.
 
-### Why a sugar-cube of neutron star weighs 400 million tonnes
+### Atoms are empty
 
-Normal atoms are **99.9999999999996% empty space** between the tiny nucleus and electron cloud; a Neutron Star crushes out all that empty space so nuclei touch wall-to-wall!
+A normal atom is almost entirely empty space. A neutron star squeezes it out, so nuclei touch.
 
-### How pulsars opened relativistic astrophysics
+### Bell kept looking
 
-By refusing to dismiss a tiny `0.5-inch` scruff on `96 feet` of paper chart recorder tape in 1967, Jocelyn Bell Burnell proved that neutron stars exist in nature.
+Jocelyn Bell Burnell noticed a quarter-inch of "scruff" on hundreds of feet of chart paper, and found the first pulsar.
 
-### Fast radio bursts found the universe's "missing" atoms
+### Bursts found the missing atoms
 
-For decades, astronomers could not find half of the universe's ordinary `5%` baryonic matter; `FRB` radio dispersion delays proved it was hiding as diffuse ionised gas between galaxies!
+Half the universe's ordinary matter was missing. Dispersion in fast radio bursts found it, as thin gas between galaxies.

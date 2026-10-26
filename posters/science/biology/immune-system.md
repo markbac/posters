@@ -1,135 +1,136 @@
 ---
 title: "How the Human Immune System Fights Infection"
-subtitle: Innate rapid response, adaptive clonal memory, antigen presentation and modern vaccines explained
-byline: Popular Science, Immunology & Human Biology Explainer
+subtitle: The fast innate response, adaptive memory, antigen presentation and vaccines
+byline: Science explainer
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-035
-version: "1.0"
 colours:
   accent: "#be123c"
   secondary: "#881337"
 footer:
-  left: Human Immune System Explainer
-  centre: Popular Science & Biology Reference
-  right: Innate vs Adaptive, Antigen Presentation, Antibodies & Vaccines Guide
+  left: The Immune System
+  centre: Science Reference
   qr: https://en.wikipedia.org/wiki/Immune_system
-  qr-label: Immune System Overview
+  qr-label: The immune system
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 4k–11k /µL | Normal White Blood Cell (leukocyte) count circulating in human blood | 24/7 patrol | good |
-| ~10¹¹ shapes | Distinct T-cell and B-cell receptor shapes built by gene shuffling | matches anything | good |
-| 2,000 / sec | Rate at which a single activated plasma B cell secretes antibodies | rapid flood | good |
-| 10 to 100× | Speed & peak antibody boost on second exposure thanks to memory cells | vaccine power | good |
+| Value | Label |
+|---|---|
+| 4,000 to 11,000 | White blood cells per microlitre of blood |
+| About 10¹¹ | Different T- and B-cell receptors in one person, made by shuffling genes |
+| 2,000 a second | Antibodies made by one plasma cell |
+| 10 to 100 × | Faster and stronger, the second time, thanks to memory cells |
 
 ## Introduction {.abstract}
 
-The human immune system combines two cooperative armies. The **innate immune system** acts within minutes using pre-programmed chemical barriers, complement proteins and phagocytes that swallow invaders whole. When an infection overwhelms frontline defences, dendritic cells carry molecular snapshots of the enemy to the **adaptive immune system**. There, custom-matched T lymphocytes and antibody-producing B lymphocytes multiply into millions of targeted effectors and store immunological memory for decades.
+The immune system is two armies working together. The **innate** system acts within minutes, with barriers, complement proteins and cells that swallow invaders. When that is not enough, **dendritic cells** carry pieces of the enemy to the lymph nodes. There the **adaptive** system grows millions of T and B cells matched to it, and keeps memory cells for decades.
 
-## 1. End-to-end timeline: from skin breach to memory {.wide}
+## 1. The course of an infection {.wide}
 
-```mermaid
-flowchart LR
-  Breach["1. Physical Barrier Breach\nBacteria or viruses cross\nskin or mucosal lining"] --> Innate["2. Innate Frontline (0-4 h)\nMacrophages & Neutrophils engulf foes\nand release cytokine alarm signals"]
-  Innate --> Bridge["3. Dendritic Cell Bridge\nCaptures pathogen proteins and\nmigrates to nearest lymph node"]
-  Bridge --> Helper["4. Helper T-Cell Activation\nMatches antigen peptide on MHC-II\nand co-stimulates B & CD8+ T cells"]
-  Helper --> Clonal["5. Clonal Expansion (Days 4-10)\nMatching B & T lymphocytes divide\ninto millions of identical clones"]
-  Clonal --> Clear["6. Clearance & Memory\nAntibodies + Killer T cells win;\nMemory B/T cells guard for decades"]
+```timeline
+Minutes | Barrier breached | Bacteria or viruses cross skin or mucosa | grey
+0 to 4 hours | Innate response | Macrophages and neutrophils engulf them and release alarm cytokines | amber
+Day 1 to 2 | The courier | Dendritic cells carry fragments to the nearest lymph node | purple
+Day 3 to 5 | Helper T cells | Recognise the fragment on MHC II, and activate B and killer T cells | blue
+Day 4 to 10 | Clonal expansion | Matching cells divide into millions: the lymph nodes swell | navy
+Weeks | Clearance and memory | Antibodies and killer T cells win; memory cells remain | green
 ```
 
-[[CAPTION:Figure]] Dendritic cells act as the courier between the two armies: they engulf invaders at the wound site and present the enemy's peptide fragments inside lymph nodes.
-
-## 2. Two defence layers: innate vs adaptive immunity {.wide}
+## 2. Two layers of defence {.wide}
 
 ```compare
-| Innate Immune System (First Line) | Adaptive Immune System (Second Line)
-Response speed | **Immediate to hours** (`0 to 96 hours` after exposure) | **Delayed** (`4 to 14 days` for clonal expansion on first exposure)
-Target recognition | Fixed germ-line sensors detect conserved microbial motifs (`PAMPs`) | Randomly recombined receptors (`TCR` and `BCR`) match one specific 3D shape
-Specificity | Broad class recognition (bacterial cell walls, double-stranded viral `RNA`) | Pinpoint precision down to a single `8 to 15` amino-acid peptide epitope
-Key cell types | Neutrophils, macrophages, natural killer (`NK`) cells, mast & dendritic cells | Helper T cells (`CD4+`), cytotoxic killer T cells (`CD8+`), B & plasma cells
-Immunological memory | **None** (same speed and intensity on every repeat encounter) | **Long-lived memory B and T cells** respond `10 to 100×` faster on re-exposure
-Soluble weapons | Complement cascade proteins, interferons, antimicrobial peptides, cytokines | Secreted immunoglobulins (`IgM`, `IgG`, `IgA`, `IgE`) tailored to the pathogen
+| Innate immunity | Adaptive immunity
+Speed | **Minutes to hours**: up to about 4 days | **Days**: 4 to 14 on first meeting
+Recognises | Patterns shared by many microbes (PAMPs), with inherited sensors | One exact shape, with receptors made by shuffling genes
+Precision | Broad: bacterial walls, viral double-stranded RNA | A single peptide of 8 to 25 amino acids
+Cells | Neutrophils, macrophages, NK, mast and dendritic cells | Helper (CD4+) and killer (CD8+) T cells, B and plasma cells
+Memory | **None** | **Memory B and T cells**, 10 to 100 times faster next time
+Weapons | Complement, interferons, antimicrobial peptides, cytokines | Antibodies: IgM, IgG, IgA, IgE
 ```
 
-## 3. Antigen presentation: `MHC` class I vs class II
+## 3. White cells in the blood
 
-T cells are blind to whole viruses floating in blood; they only inspect short peptide fragments displayed inside **Major Histocompatibility Complex (MHC)** cradles:
+```segments
+title: White blood cells of a healthy adult
+60 | Neutrophils | 60 % | red
+30 | Lymphocytes: T, B, NK | 30 % | blue
+6 | Monocytes | 6 % | purple
+3 | Eosinophils | 3 % | amber
+1 | Basophils | 1 % | grey
+```
+
+## 4. Showing T cells what is inside
+
+T cells cannot see a whole virus. They inspect short peptides held up in **MHC** molecules:
 
 ```cards cols=1 style=top
-MHC Class I (Every Nucleated Cell — "Internal Quality Check") | Every nucleated cell constantly chops up a sample of its internal proteins and displays them on `MHC` Class I cradles. If a virus hijacks the cell, viral peptides appear on the surface, alerting **`CD8+` cytotoxic killer T cells** to trigger self-destruction (`apoptosis`) before the virus can multiply | red
-MHC Class II (Antigen-Presenting Cells — "External Recon") | Dendritic cells, macrophages and B cells swallow extracellular invaders, digest them in acidic vesicles, and load the fragments onto `MHC` Class II cradles to activate **`CD4+` helper T cells** | blue
-Natural Killer (`NK`) Cells ("Missing-Self" Patrol) | Some viruses hide from killer T cells by forcing infected cells to pull `MHC` Class I off their surface. `NK` cells execute any cell that lacks normal `MHC` Class I display | purple
+MHC class I: every cell | Every nucleated cell displays pieces of its own proteins. If a virus is inside, viral pieces appear, and **CD8+ killer T cells** make the cell destroy itself | red
+MHC class II: the scouts | Dendritic cells, macrophages and B cells swallow invaders and display the pieces to **CD4+ helper T cells** | blue
+NK cells: the missing self | Some viruses make cells hide MHC I. Natural killer cells destroy any cell that shows none | purple
 ```
 
-```chart type=bar title="Share of circulating white blood cells in healthy adults (%)" unit="%" max=70
-Neutrophils | 60
-Lymphocytes (T/B) | 30
-Monocytes | 6
-Eosinophils | 3
-Basophils | 1
+## 5. What antibodies do
+
+```cards cols=1 style=label
+Neutralise | Bind a virus's spikes or a toxin, so it cannot attach to a cell
+Tag | The arms (Fab) grip the microbe; the stem (Fc) is a handle for phagocytes, which then eat it far faster
+Complement | Bound antibodies recruit complement proteins that punch holes in bacteria
+Point out | NK cells bind the stems of antibodies coating an infected cell, and kill it
 ```
 
-## 4. How antibodies neutralise and clear pathogens
+## 6. The second time is faster
 
-```cards cols=2 style=label
-1. Direct Neutralisation | Antibodies bind tightly to viral spike proteins or bacterial toxins, physically blocking them from latching onto host cell receptors
-2. Opsonisation ("Tagging") | The variable arms (`Fab`) grip the bacterium while the constant stem (`Fc`) acts as a handle for macrophage receptors, speeding up engulfment 100-fold
-3. Complement Cascade | Bound `IgM` or `IgG` antibodies recruit serum complement proteins that punch lethal pores (**Membrane Attack Complex**) straight through bacterial membranes
-4. NK Cell Targeting | Natural killer cells bind the exposed antibody stems coating an infected or tumour cell and inject enzymes that command the cell to self-destruct
+```chart type=line title="Antibody level after a first and a second exposure (illustrative)" unit="" min=0 max=10 step=2 height=200 colours=blue,red values=none axis="log₁₀ titre"
+series: First exposure, Second exposure
+Week 0 | 0 | 2
+Week 1 | 1 | 9
+Week 2 | 4 | 10
+Week 3 | 3 | 9
+Week 4 | 2 | 8
+Week 6 | 2 | 7
 ```
 
-```chart type=line title="Primary vs secondary antibody response (log10 titre)" unit=" log" min=0 max=10 step=2 height=180 colours=blue,red values=last
-series: 1st Exposure, 2nd (Vaccine)
-W0 | 0 | 2
-W1 | 1 | 9
-W2 | 4 | 10
-W3 | 3 | 9
-W4 | 2 | 8
-W6 | 2 | 7
-```
+## 7. How vaccines train memory {.wide}
 
-## 5. How vaccines train immunological memory
-
-Vaccination introduces a harmless version or genetic blueprint of the pathogen's antigen. This builds a standing army of memory B and T cells without risking severe disease:
+A vaccine shows the immune system a harmless form of the antigen, or the instructions to make it, so memory forms without the disease.
 
 ```compare
-| Live Attenuated / Inactivated | Subunit / Recombinant Protein | Genetic Blueprint (`mRNA` / Vector)
-What enters the body | Weakened or killed whole virus or bacterium | Purified surface protein (plus an immune-boosting adjuvant) | Messenger Ribonucleic Acid (`mRNA`) or harmless viral vector encoding the antigen
-Pathways triggered | Both `MHC` Class I and II (attenuated); mainly Class II (inactivated) | Primarily `MHC` Class II (strong antibodies, lighter `CD8+` killer T response) | Both `MHC` Class I (host cell builds protein internally) and `MHC` Class II
-Clinical examples | Measles-Mumps-Rubella (`MMR`), inactivated polio, yellow fever | Hepatitis B surface antigen, shingles, acellular pertussis | Coronavirus spike `mRNA` vaccines, adenovirus-vectored vaccines
+| Live attenuated, or inactivated | Subunit, or recombinant protein | Genetic: mRNA or viral vector
+What goes in | A weakened or killed whole microbe | A purified surface protein, with an adjuvant | The instructions for the antigen
+What it triggers | MHC I and II (live); mostly MHC II (killed) | Mostly MHC II: strong antibodies | MHC I and II: the body's own cells make the protein
+Examples | MMR, inactivated polio, yellow fever | Hepatitis B, shingles, acellular pertussis | COVID-19 mRNA vaccines, adenovirus-vector vaccines
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 8. Glossary {.wide}
 
-```cards cols=4 style=label
-PAMPs & PRR | Pathogen-Associated Molecular Patterns (microbial signatures) and Pattern Recognition Receptor (innate Toll-like alarm sensor)
-MHC & APC | Major Histocompatibility Complex (peptide display cradle) and Antigen-Presenting Cell (dendritic cell, macrophage or B cell)
-TCR & BCR | T-Cell Receptor (recognises peptide bound to MHC) and B-Cell Receptor (surface antibody recognising intact 3D pathogen shapes)
-CD4+ & CD8+ | Cluster of Differentiation 4 (Helper T cells coordinating immunity) and Cluster of Differentiation 8 (Cytotoxic Killer T cells)
-IgG, IgM & IgA | Immunoglobulin G (main blood antibody), IgM (first-responder pentamer) and IgA (mucosal antibody in tears, saliva and gut)
-NK & MAC | Natural Killer cell (innate lymphocyte targeting virus/tumour cells) and Membrane Attack Complex (complement pore-forming ring)
-Fab & Fc | Fragment antigen-binding (variable Y-tips of an antibody) and Fragment crystallisable (constant stem that signals phagocytes)
-mRNA & MMR | Messenger Ribonucleic Acid (temporary genetic blueprint for protein synthesis) and Measles, Mumps and Rubella vaccine
+```glossary cols=4
+APC | Antigen-presenting cell
+BCR, TCR | B-cell and T-cell receptors
+CD4+, CD8+ | Helper and killer T cells
+Fab, Fc | The arms and the stem of an antibody
+IgG, IgM, IgA | Antibody classes: main blood, first responder, mucosal
+MHC | Major histocompatibility complex: the peptide display
+NK | Natural killer cell
+PAMP | Pathogen-associated molecular pattern
 ```
 
 ## In short {.summary}
 
-The **innate system** holds the line for the first 96 hours while **dendritic cells** carry antigen snapshots to lymph nodes. There, the **adaptive system** multiplies matching `CD4+`, `CD8+` and B-cell clones that clear the infection and remember the pathogen for life.
+The innate system holds the line while dendritic cells carry fragments to the lymph nodes. There, the adaptive system multiplies matching T and B cells, clears the infection, and remembers it.
 
-### Two cradles for two threats
+### Two displays for two threats
 
-`MHC` Class I reveals viruses hiding *inside* cells to killer T cells, whereas `MHC` Class II shows engulfed *external* invaders to helper T cells.
+MHC I shows killer T cells what is inside a cell; MHC II shows helper T cells what was swallowed.
 
-### Swollen nodes mean clonal expansion
+### Swollen nodes are good news
 
-Swollen lymph nodes during a sore throat mean matching T and B lymphocytes are dividing rapidly into millions of effector cells inside the node.
+They mean matching lymphocytes are multiplying.
 
-### Vaccines skip the dangerous wait
+### Vaccines skip the wait
 
-Pre-training memory B and T cells turns a slow 14-day primary response into an immediate 24-hour flood of high-affinity `IgG` antibodies.
+Memory cells turn a two-week first response into a flood of antibodies within days.

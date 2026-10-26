@@ -1,148 +1,148 @@
 ---
 title: "Embedded Rust vs C for Bare-Metal Firmware"
-subtitle: Compile-time memory safety, typestate peripheral drivers and zero-cost abstractions without a garbage collector
-byline: Modern Embedded Programming Languages & Safety Architecture Explainer
+subtitle: Memory safety at compile time, typestate drivers and zero-cost abstractions, with no garbage collector
+byline: Embedded firmware engineering
 orientation: landscape
-columns: 2
+columns: 3
 paper: a1
 width: 1750
 document_number: PO-026
-version: "1.0"
 colours:
   accent: "#c2410c"
   secondary: "#9a3412"
 footer:
-  left: Embedded Rust vs C Explainer
-  centre: Bare-Metal Firmware Reference
-  right: Ownership, Typestate HAL, RTIC & Embassy Guide
+  left: Embedded Rust vs C
+  centre: Embedded Engineering Reference
   qr: https://docs.rust-embedded.org/book/
   qr-label: The Embedded Rust Book
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 0 bytes | Runtime garbage collector or operating system required in `#![no_std]` Rust | bare-metal speed | good |
-| ~70% | Industry share of severe systems vulnerabilities caused by memory unsafety | caught at compile | good |
-| 1 owner | Rust borrow checker rule: either `1 mutable (&mut T)` or `N shared (&T)` refs | zero data races | good |
-| 0 CPU cost | Typestate pin configuration checks happen entirely at compile time | zero-cost safety | good |
+| Value | Label |
+|---|---|
+| 0 bytes | Of runtime, garbage collector or OS needed by no_std Rust |
+| About 70 % | Of severe security bugs in large C and C++ code bases that are memory-safety bugs |
+| 1 or many | One mutable reference, or many shared ones: never both |
+| 0 cycles | Cost of typestate checks: they all happen at compile time |
 
 ## Introduction {.abstract}
 
-For forty years, C has ruled microcontrollers because higher-level languages required heavy runtimes or garbage collectors. **Rust** changes that equation: using `#![no_std]`, Rust compiles to bare-metal `ARM Cortex-M` and `RISC-V` machine code via **Low Level Virtual Machine (LLVM)** with the same **Static Random-Access Memory (SRAM)** footprint as C. By enforcing **ownership**, **lifetimes** and **typestate drivers** at compile time, Embedded Rust eliminates null pointers, buffer overflows and interrupt data races before flashing.
+C has ruled microcontrollers for forty years because other languages needed a runtime or a garbage collector. **Rust** does not: with `no_std` it compiles through LLVM to bare-metal Cortex-M and RISC-V code, in about the RAM of C. Its **ownership** rules and **typestate** drivers turn null pointers, buffer overflows, data races and misconfigured pins into **compile errors**.
 
-## 1. Three compile-time guarantees that C leaves to discipline {.wide}
+## 1. Three guarantees C leaves to discipline {.wide}
 
 ```cards cols=3 style=top
-1. Ownership & Borrowing (No Aliasing XOR Mutability) | Every value has a single owner. At any point in time, you may have **either** one mutable reference (`&mut T`) **or** any number of read-only references (`&T`)—never both. This makes accidental aliasing and dangling pointers a compile error | amber
-2. Typestate Peripheral Configuration (Zero Runtime Cost) | In C, nothing stops you calling `spi_write()` before configuring the clock or pin mode. In Rust, `gpioa.pa5.into_push_pull_output()` **consumes** the unconfigured pin type and returns an `Output<PushPull>` type; using the old pin won't compile! | green
-3. Fearless Concurrency (`Send` & `Sync` Traits) | In C, any function or Interrupt Service Routine (`ISR`) can read or write a global variable without a lock. In Rust, mutable global state is forbidden unless wrapped in an explicit `Mutex<RefCell<T>>` unlocked by a critical-section token | blue
+Ownership and borrowing | Every value has one owner. You may hold **one** mutable reference (`&mut T`) **or** any number of shared ones (`&T`), never both, so aliasing bugs and dangling pointers do not compile | amber
+Typestate peripherals | Nothing in C stops `spi_write()` before the clock is on. In Rust, configuring a pin **consumes** the old pin and returns a new type: using the old one is a compile error | green
+Safe concurrency | In C, any interrupt can write any global. In Rust, shared mutable state must be wrapped, such as in a `Mutex`, and opened with a critical-section token | blue
 ```
 
-## 2. Side-by-side: C peripheral driver vs Rust typestate driver
+## 2. A pin, in C and in Rust {.wide}
 
-Compare how C and a Rust **Hardware Abstraction Layer (HAL)** configure a **General-Purpose Input/Output (GPIO)** pin and prevent accidental misuse:
-
-```lcd cols=2
-// C: Runtime register bitmasks — bugs only found on oscilloscope!
-void init_and_blink(void) {
-  GPIOA->MODER |= (1U << 10); // Configure PA5 as output
-  GPIOA->ODR   |= (1U << 5);  // Drive PA5 high
-
-  // BUG: Another module reconfigures PA5 as input,
-  // but we still write to ODR (silently fails at runtime!):
-  GPIOA->MODER &= ~(3U << 10);
-  GPIOA->ODR   |= (1U << 5);  // Compiles fine, pin never moves!
-}
--- C compiler cannot know whether PA5 is currently an Input or Output
-
-// RUST (#![no_std]): Typestate moves ownership at compile time!
-fn init_and_blink(dp: pac::Peripherals) {
-  let gpioa = dp.GPIOA.split();
-  // into_push_pull_output() consumes pa5 (Input<Floating>)
-  // and returns led: PA5<Output<PushPull>>
-  let mut led = gpioa.pa5.into_push_pull_output();
-  led.set_high();
-
-  let btn = led.into_floating_input(); // Consumes `led`!
-  // led.set_high(); // <-- COMPILE ERROR: value `led` used after move!
-}
--- Zero bytes of extra RAM or Flash; state transition is strictly types!
+```code-compare
+@bad C: registers and hope
+GPIOA->MODER |= (1U << 10);   /* PA5 output */
+GPIOA->ODR   |= (1U << 5);    /* PA5 high   */
+/* elsewhere, someone makes PA5 an input */
+GPIOA->MODER &= ~(3U << 10);
+GPIOA->ODR   |= (1U << 5);    <1>
+@good Rust: the type is the state
+let gpioa = dp.GPIOA.split();
+let mut led = gpioa.pa5.into_push_pull_output();
+led.set_high();
+let btn = led.into_floating_input();   <2>
+led.set_high();                        <3>
+-- 1 | Compiles, runs, and the pin never moves: found only with a scope
+-- 2 | Turning the pin into an input consumes led
+-- 3 | Compile error: value led used after move
 ```
 
-## 3. The Embedded Rust crate ecosystem {.wide}
+What the type of `led` says:
 
-Rust organises microcontroller support into four clean, reusable layers generated from vendor **System View Description (SVD)** schema files (`XML`):
-
-```mermaid
-flowchart LR
-  SVD["Vendor SVD File\n(Register Map XML)"] -->|"svd2rust"| PAC["1. PAC (Peripheral Access Crate)\ne.g. stm32f4 / nrf52840-pac\nType-safe register bitfields"]
-  PAC --> HAL["2. HAL Implementation\ne.g. stm32f4xx-hal / esp-hal\nImplements Typestate drivers"]
-  Traits["3. embedded-hal Traits\nStandard SPI, I2C, Delay, Pin\ninterfaces across all chips!"] --> HAL
-  Traits --> Drv["4. Portable Sensor Driver\ne.g. bme280 / ssd1306 crate\nWorks on STM32, nRF, RP2040, ESP32!"]
+```syntax-anatomy width=2400
+PA5<Output<PushPull>>
+PA5 | Which pin | navy
+Output | Its mode | green
+PushPull | Its drive | amber
 ```
 
-[[CAPTION:Figure]] Because every vendor HAL implements the standard `embedded-hal` traits, a single sensor driver crate works across `STM32`, `nRF52`, `RP2040` and `ESP32` without changing a line of code.
+## 3. The crate layers
 
-## 4. Head-to-head comparison {.wide}
+Each layer is generated from, or built on, the one below. Every HAL implements the `embedded-hal` traits, so one sensor driver works on STM32, nRF52, RP2040 and ESP32 unchanged.
 
-```compare
-| Embedded C (`C99` / `C11`) | Embedded Rust (`#![no_std]` + `embedded-hal`)
-Array & slice bounds | Unchecked pointer indexing (`buf[i]` can overwrite stack) | Checked slices (`&[u8]`) or zero-cost iterators (`for b in buf`)
-Null pointers & error handling | Raw `NULL` pointers and ignored integer return codes | No `null`! Uses **`Option<T>`** and **`Result<T, E>`** with `#[must_use]`
-Interrupt concurrency safety | Manual `volatile` and discipline; easy to forget critical section | Enforced by compiler via `CriticalSection` token, **`RTIC`** or **`Embassy` async**
-Package reuse & build system | Fragmented (`CMake`, `Make`, vendor ZIP drops, manual copy) | Unified **`Cargo`** build tool + `crates.io` + `probe-rs` flashing/logging
-Direct hardware / assembly access | Everywhere by default (any pointer cast is legal) | Explicitly quarantined inside **`unsafe { ... }`** blocks (`< 2%` of app code)
-Silicon vendor & safety certification | Universal vendor SDKs; mature `ISO 26262` compilers | Rapidly growing (`Ferrocene` ISO 26262 / IEC 61508 qualified compiler)
+```stack
+Application | app | Your firmware, with forbid(unsafe_code) | green
+Drivers | bme280 | Portable sensor and display crates | teal
+embedded-hal | traits | SPI, I2C, delay and pin interfaces | blue
+HAL | stm32f4xx-hal | Typestate drivers for one family | navy
+PAC | svd2rust | Register structs, from the vendor's SVD file | grey
+side: unsafe lives here | 4-5 | red
 ```
 
-## 5. Modern concurrency: `Embassy` async vs `RTIC`
+## 4. Concurrency without an RTOS
 
-Embedded Rust offers two zero-heap concurrency frameworks that beat traditional multi-stack **Real-Time Operating System (RTOS)** kernels on RAM usage:
-
-```cards cols=2 style=label
-RTIC (Real-Time Interrupt-driven Concurrency) | Uses the microcontroller's built-in hardware interrupt controller (`NVIC`) to schedule tasks with **Priority Ceiling Protocol** resource locking; shares **one single call stack** with zero deadlocks
-Embassy (Bare-Metal Async / Await) | Compiles `async fn` tasks into cooperative state machines at compile time; waits on DMA, timers and radio interrupts with `< 1 KB` RAM overhead and no per-thread stack sizing guesswork
-defmt (Deferred Formatting Logger) | Compiles log strings (`defmt::info!("Temp: {} C", t)`) out of the target Flash image; the MCU sends only a 1-byte string index + raw arguments over `RTT`!
-C <-> Rust Interop (`FFI`) | Call certified C stacks from Rust (`bindgen`) or link a Rust static library (`#[no_mangle] pub extern "C" fn`) into an existing C `CMake` firmware project incrementally
+```cards cols=1 style=label
+RTIC | Uses the interrupt controller (NVIC) as the scheduler, with priority-ceiling locks: one shared stack and no deadlocks, proved at compile time
+Embassy | Compiles async tasks into state machines. Waits for DMA, timers and radio with no stack per task to size
+defmt | Leaves format strings on the host: the MCU sends a string index and raw values over RTT
+C and Rust together | Call C from Rust with bindgen, or link a Rust static library into a C project one module at a time
 ```
 
-## 6. Adopting Rust in firmware checklist {style=card colour=amber}
+## 5. Adopting Rust {style=card colour=amber}
 
 ```checklist
-[x] Start with `#![no_std]` and `#![no_main]`, using `heapless::Vec` and `heapless::String` for fixed-capacity static collections
-[x] Set `opt-level = "z"` or `"s"` and `lto = true` (Link-Time Optimisation) in `Cargo.toml` so zero-cost abstractions inline completely
-[x] Use `probe-rs` + `defmt` + `flip-link` (places stack at bottom of RAM so stack overflow hits a deterministic hardware fault)
-[x] Keep `unsafe` blocks restricted to low-level HAL/PAC crates; require `#![forbid(unsafe_code)]` in application business logic
-[x] When migrating a legacy C product, compile one new parser or cryptographic module in Rust as a static library (`libapp.a`) first
+[x] Start `no_std` and `no_main`, with `heapless` for fixed-size collections
+[x] Optimise for size, with link-time optimisation, so abstractions inline away
+[x] Use probe-rs, defmt and flip-link, which puts the stack at the bottom of RAM so an overflow faults at once
+[x] Keep `unsafe` in the HAL and PAC; forbid it in application code
+[x] Migrating C? Build one new parser or crypto module in Rust as a static library first
 ```
 
-## 7. Acronym guide: every term defined {.wide}
+```toml
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+```
 
-```cards cols=4 style=label
-HAL & PAC | Hardware Abstraction Layer (high-level ergonomic drivers) and Peripheral Access Crate (low-level register structs)
-SVD | System View Description: ARM CMSIS XML schema describing every peripheral register and bitfield on a chip
-RTIC | Real-Time Interrupt-driven Concurrency: hardware-scheduled Rust framework with compile-time deadlock freedom
-LLVM | Low Level Virtual Machine: optimising compiler backend used by both `rustc` and `clang` to emit machine code
-FFI & ABI | Foreign Function Interface and Application Binary Interface: calling conventions allowing C and Rust to link together
-NVIC | Nested Vectored Interrupt Controller: Cortex-M hardware block used by RTIC to preempt and prioritise tasks
-LTO | Link-Time Optimisation: whole-program compiler pass that strips unused code and inlines across crates
-defmt | Deferred Formatting: ultra-compact logging framework that moves string formatting from the MCU to the host PC
+## 6. Head to head {.wide}
+
+```compare
+| Embedded C (C99, C11) | Embedded Rust (no_std, embedded-hal)
+Bounds | `buf[i]` is unchecked and can overwrite the stack | Slices are checked, or iterators need no index at all
+Null and errors | NULL pointers and ignored return codes | No null: `Option<T>` and `Result<T, E>`, which must be used
+Interrupt safety | `volatile` and discipline | Enforced by the compiler: critical sections, **RTIC** or **Embassy**
+Build and reuse | CMake, Make, vendor ZIP files | **Cargo**, crates.io and probe-rs
+Hardware access | Anywhere: any cast is legal | Only inside `unsafe { }` blocks, typically a few percent of the code
+Safety certification | Mature ISO 26262 toolchains | **Ferrocene**: a Rust compiler qualified for ISO 26262 and IEC 61508
+```
+
+## 7. Glossary {.wide}
+
+```glossary cols=4
+FFI | Foreign function interface: calling across languages
+HAL | Hardware abstraction layer
+LLVM | The compiler back end of rustc and clang
+LTO | Link-time optimisation
+NVIC | Nested Vectored Interrupt Controller, in every Cortex-M
+PAC | Peripheral access crate: generated register structs
+RTIC | Real-Time Interrupt-driven Concurrency
+SVD | System View Description: a chip's registers, in XML
 ```
 
 ## In short {.summary}
 
-Embedded **Rust (`#![no_std]`)** gives you C's bare-metal speed and predictable memory layout while turning data races, null pointers, buffer overruns and misconfigured pins into **compile-time errors**.
+Embedded Rust keeps C's speed and memory layout, and turns data races, null pointers, overruns and misconfigured pins into compile errors.
 
-### Zero-cost typestate pins
+### Typestate costs nothing
 
-Encoding peripheral state in the type system catches hardware configuration mistakes in your editor with zero bytes of runtime overhead.
+Pin states in the type system catch configuration mistakes in the editor, with no runtime cost.
 
-### Quarantine `unsafe` in the HAL
+### Keep unsafe small
 
-When 98% of your application carries `#![forbid(unsafe_code)]`, any memory corruption bug can only hide in the tiny 2% hardware boundary.
+With the application free of unsafe code, memory bugs can only hide in the thin layer next to the hardware.
 
-### Async without an RTOS heap
+### Async without a heap
 
-`Embassy` and `RTIC` let you write clean sequential concurrency on a single shared stack without guessing thread stack sizes.
+Embassy and RTIC give clear concurrent code on one stack, with no thread stacks to guess.

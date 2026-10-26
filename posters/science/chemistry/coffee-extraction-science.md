@@ -1,132 +1,151 @@
 ---
 title: "The Physics and Chemistry of Espresso and Coffee Extraction"
-subtitle: Solute dissolution kinetics, Darcy's law percolation, bimodal grind distributions and water chemistry
-byline: Popular Science, Physical Chemistry & Food Engineering Explainer
+subtitle: What dissolves when, why grind and pressure matter, how roasting works, and what water does
+byline: Science explainer
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-036
-version: "1.0"
 colours:
   accent: "#b45309"
   secondary: "#78350f"
 footer:
-  left: Espresso & Coffee Extraction Science Explainer
-  centre: Applied Chemistry & Physics Reference
-  right: Extraction Yield, Darcy's Law, Grind Distribution & Water Chemistry Guide
+  left: Coffee Extraction
+  centre: Science Reference
   qr: https://sca.coffee/research
-  qr-label: Specialty Coffee Science
+  qr-label: SCA research
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 18 to 22% | Target Extraction Yield (EY) of dry roasted bean mass dissolved | balanced cup | good |
-| 8 to 12% | Total Dissolved Solids (TDS) in espresso (1.3% in filter coffee) | syrupy body | good |
-| 9 bar | Standard espresso gauge pressure (900 kPa — 9× atmospheric pressure) | emulsifies oils | good |
-| 98.5% | Share of filter coffee that is water (magnesium, calcium & bicarbonate govern taste!) | water chemistry | good |
+| Value | Label |
+|---|---|
+| 18 to 22 % | Of the dry coffee dissolved: the extraction yield of a balanced cup |
+| 8 to 12 % | Dissolved solids in espresso; about 1.3 % in filter coffee |
+| 9 bar | The standard espresso pressure |
+| 98.5 % | Of a cup of filter coffee that is water |
 
 ## Introduction {.abstract}
 
-Roasted coffee beans consist of `~70%` insoluble cellulose structure and `~30%` water-soluble chemical compounds. Brewing coffee is a **solid-liquid chemical extraction** governed by diffusion out of microscopic cell pores and advection by flowing hot water. Different flavour molecules dissolve at different speeds based on molecular weight and polarity. Stopping extraction inside the **18% to 22% Extraction Yield (EY)** window separates bright fruit acids and caramelised sugars from harsh, dry plant astringency.
+A roasted bean is about **70 % insoluble** cell walls and **30 % soluble** compounds. Brewing is a **solid-liquid extraction**: compounds diffuse out of tiny pores and are carried away by flowing water. Different molecules dissolve at different speeds, and stopping inside the **18 to 22 % extraction yield** window keeps the fruit acids and caramel sugars, and leaves the harsh, dry ones behind.
 
-## 1. Selective dissolution: why timing controls flavour
+## 1. What dissolves when
 
-Water does not extract all coffee compounds at the same speed. Small, polar molecules dissolve in seconds, whereas large, hydrophobic plant phenols dissolve slowly at the end of the shot:
+Small polar molecules dissolve in seconds; large plant compounds come out last.
 
-```figure
-@segments
-title: Sequential extraction across an espresso shot or pour-over brew (Why stopping early tastes sour and stopping late tastes bitter!)
-3 | 1. Early (0–30% time): Polar Fruit Acids, Caffeine & Floral Volatiles | Sour / Bright | amber
-4 | 2. Middle (30–70% time): Maillard Melanoidins, Sugars & Caramel Notes | Sweet / Balanced! | green
-3 | 3. Late (70–100% time): Heavy Plant Fibres, Quinic Lactones & Tannins | Bitter / Dry! | red
+```segments
+title: Over the course of a shot or a pour-over
+3 | Early: fruit acids, caffeine, floral aromas | Sour, bright | amber
+4 | Middle: sugars and Maillard compounds | Sweet, balanced | green
+3 | Late: heavy plant compounds and tannins | Bitter, dry | red
 ```
 
-```chart type=bar title="Relative dissolution rate by compound family (0-100 index)" unit="%" max=100
-Caffeine & acids | 95
-Volatile aromas | 85
-Caramel sugars | 65
-Melanoidin body | 50
-Bitter phenols | 20
+```equation
+title: Extraction yield
+\mathrm{EY} = \frac{\mathrm{TDS} \times m_{\text{drink}}}{m_{\text{dose}}}
+\mathrm{TDS} | Dissolved solids in the drink, from a refractometer | %
+m_{\text{drink}} | Mass of the drink | g
+m_{\text{dose}} | Mass of dry coffee | g
 ```
 
-## 2. Darcy's law and the espresso puck paradox
+18 g of coffee into 36 g of espresso at 10 % TDS gives an extraction yield of **20 %**.
 
-Flow through a compacted espresso bed obeys **Darcy's law** for porous media. Volumetric flow rate equals `Q = (k × A × ΔP) / (μ × L)`, where `k` is puck permeability, `A` is basket area, `ΔP` is pump pressure, `μ` is water viscosity and `L` is puck depth:
+## 2. Flow through the puck
+
+```equation
+title: Darcy's law
+Q = \frac{k A \, \Delta P}{\mu L}
+Q | Flow rate | m³/s
+k | Permeability of the puck | m²
+A, L | Area and depth of the puck | m², m
+\Delta P | Pressure across it | Pa
+\mu | Viscosity of the water | Pa·s
+```
+
+```cards cols=1 style=label
+Fines | A burr grinder makes large particles (200 to 500 µm) that form the puck's skeleton, and fines under 100 µm that give a huge surface area
+More pressure, not more flow | Above about 9 bar the bed compresses, packs fines against the basket and lowers k: shots often run slower, and channel
+```
+
+## 3. Roasting
+
+```gradient-scale from=20 to=250 unit=" °C" colours=green,amber,brown,red step=50
+150 | Maillard reactions begin
+196 | First crack: light to medium roast
+224 | Second crack: dark roast
+```
+
+```cards cols=1 style=top
+Drying | The green bean loses its 11 % or so of water, absorbing heat | green
+Maillard and caramelisation | Amino acids and sugars build nutty, bready and sweet aromas | amber
+First crack | Steam and CO₂ split the cell walls with an audible crack | brown
+Second crack | Chlorogenic acids break down into bitter compounds, and oils move to the surface | red
+```
+
+## 4. Under, balanced, over {.wide}
 
 ```compare
-| Under-Extracted Shot (`< 18% EY`) | Balanced Sweet Spot (`18 to 22% EY`) | Over-Extracted / Channelled (`> 22% EY`)
-Sensory profile | **Sharp, sour, salty**, thin body and vanishes quickly | **Ripe acidity** balanced by syrupy sweetness and cocoa finish | **Hollow, harsh, dry astringency** that coats the tongue
-Flow dynamics | Fast "gusher" (grind too coarse or low dose; high permeability `k`) | Even, honey-like laminar flow across the entire bottomless basket | Slow drip or blonde jets where water punches a low-resistance hole
-How to fix it | **Grind finer**, increase brew ratio (more water) or raise temperature | Lock in grinder setting, dose mass (`±0.1 g`) and distribution | **Grind slightly coarser**, declump grounds (`WDT`) or lower ratio
+| Under-extracted, under 18 % | Balanced, 18 to 22 % | Over-extracted or channelled, over 22 %
+Taste | **Sharp, sour, salty**, thin, gone at once | **Ripe acidity** with syrupy sweetness and a cocoa finish | **Hollow, harsh, drying**, coating the tongue
+Flow | A fast gusher: too coarse, or too little coffee | Even, honey-like flow across the basket | Slow drips, or pale jets where water found a short cut
+Fix | **Grind finer**, use more water, or hotter | Keep the grind, dose (to 0.1 g) and distribution | **Grind a little coarser**, break up clumps (WDT), or use less water
 ```
 
-- **Why "Fines" Matter (Bimodal Particle Size Distribution)**: A burr grinder produces both larger particles (`200 to 500 µm`) that form the structural skeleton of the puck and microscopic **fines** (`< 100 µm`) that provide massive surface area for rapid extraction.
-- **The Over-Pressure Trap (`> 9 to 10 bar`)**: Cranking pump pressure from `9 bar` to `15 bar` rarely speeds up an espresso shot! Excess pressure crushes the deformable cellulose bed, packs fines against the basket holes, shrinks permeability `k`, and triggers **channelling**.
+## 5. Drinks, to scale
 
-## 3. Roasting chemistry: from green seed to brown bean
-
-```mermaid
-flowchart LR
-  Green["1. Green Bean (20-150°C)\nEndothermic drying phase\nevaporates 11% moisture"] --> Maillard["2. Maillard & Strecker (150-190°C)\nAmino acids + sugars react to build\nnutty, bready & floral aromatics"]
-  Maillard --> Crack1["3. First Crack (~196°C)\nSteam & CO2 pop cell walls;\nsucrose caramelises (Light/Med)"]
-  Crack1 --> Crack2["4. Second Crack (220°C+)\nChlorogenic acids break into bitter\nquinic lactones; oils migrate out"]
+```vessels
+Espresso | 36 ml Espresso (amber)
+Cortado | 36 ml Espresso (amber) + 36 ml Milk (#f3e3c3)
+Flat white | 36 ml Espresso (amber) + 120 ml Microfoam (#f3e3c3)
+Cappuccino | 36 ml Espresso (amber) + 60 ml Milk (#f3e3c3) + 60 ml Foam (#fbf6ee)
 ```
 
-```chart type=line title="Chemical evolution across roast degree (relative %)" unit="%" min=0 max=100 step=25 height=180 colours=amber,green,red values=last
-series: Organic Acids, Aroma Volatiles, Bitter Lactones
-Green | 80 | 10 | 5
-Light | 95 | 75 | 25
-Medium | 70 | 95 | 55
-Dark | 35 | 60 | 95
-```
-
-## 4. Water chemistry: why minerals make or break coffee {.wide}
-
-Distilled water brews flat, sour coffee, whereas hard tap water brews chalky, lifeless coffee. Three dissolved ions govern extraction and acidity buffering:
-
-```cards cols=3 style=top
-1. Magnesium (`Mg²⁺` — The Aromatic Magnet) | Small, charge-dense magnesium ions bind strongly to oxygen-rich volatile aromatics and fruity esters, pulling bright, complex top notes into the cup without forming hard boiler scale | green
-2. Calcium (`Ca²⁺` — Creamy Body & Heavy Notes) | Larger calcium ions extract heavier, creamy and chocolatey compounds, though excess calcium (`> 80 mg/L`) combines with bicarbonate to precipitate limestone scale inside espresso boilers | blue
-3. Bicarbonate (`HCO₃⁻` — The Acid Buffer) | Alkalinity (`KH`) neutralises hydrogen ions (`H⁺`) from citric and malic acids. Too little buffer (`< 20 mg/L`) tastes bitingly sour; too much (`> 80 mg/L`) flattens all fruit acidity into chalk | amber
-```
-
-## 5. Barista engineering checklist {style=card colour=amber}
+## 6. Checklist {style=card colour=amber}
 
 ```checklist
-[x] **Rest freshly roasted beans (`3 to 14 days`)** so trapped Carbon Dioxide (`CO₂`) gas escapes; brewing too early causes violent gas bubbles that repel water
-[x] **Weigh input dose and liquid output (`Brew Ratio`)** to `0.1 g` precision (`e.g. 18.0 g dry coffee -> 36.0 g liquid espresso` in `25 to 30 seconds`)
-[x] **Break up clumps before tamping** using a fine needle tool (**Weiss Distribution Technique, `WDT`**) so water flows evenly through every millimetre of the puck
-[x] **Formulate brewing water** around `50 to 80 mg/L` General Hardness (`GH`, rich in `Mg²⁺`) and `30 to 45 mg/L` Alkalinity (`KH`) to balance sweetness and acidity
+[x] Rest fresh beans 3 to 14 days so CO₂ escapes: gas pushes water away
+[x] Weigh dose and drink to 0.1 g: 18 g in, 36 g out, in 25 to 30 seconds
+[x] Break up clumps with a needle tool (WDT) before tamping
+[x] Brewing water of 50 to 80 mg/L hardness, rich in magnesium, and 30 to 45 mg/L alkalinity
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 7. Glossary
 
-```cards cols=4 style=label
-EY & TDS | Extraction Yield (% of dry coffee mass dissolved) and Total Dissolved Solids (% concentration of coffee solids in the liquid cup)
-PSD & WDT | Particle Size Distribution (spread of fines and boulders from a grinder) and Weiss Distribution Technique (needle declumping)
-GH & KH | General Hardness (dissolved `Ca²⁺` and `Mg²⁺` extraction ions) and Carbonate Hardness / Alkalinity (`HCO₃⁻` acid-buffering ions)
-CGA & CO₂ | Chlorogenic Acids (antioxidants that degrade into bitter quinic lactones in dark roasts) and Carbon Dioxide (roasting gas)
-bar & kPa | Metric pressure units: `1 bar = 100 kilopascals (kPa)`, roughly equal to Earth's atmospheric pressure at sea level
-Darcy's Law | Fluid dynamics equation describing pressure-driven flow through a porous medium such as a compacted coffee puck
-Maillard Reaction | Chemical reaction between amino acids and reducing sugars above `140 °C` that creates brown melanoidins and savoury/sweet aromas
-Refractometer | Optical instrument that measures the refractive index of brewed coffee to calculate exact `TDS` and Extraction Yield
+```glossary cols=1
+EY | Extraction yield: the share of the dose dissolved
+GH, KH | General hardness (Ca, Mg) and carbonate hardness (alkalinity)
+Maillard reaction | Amino acids and sugars browning above about 140 °C
+PSD | Particle size distribution of the grind
+TDS | Total dissolved solids in the drink
+WDT | Weiss distribution technique: breaking clumps with a needle
+Brew ratio | Dry coffee to drink: about 1:2 espresso, 1:16 filter
+Channelling | Water short-cutting through the puck
+Refractometer | Measures TDS from how light bends
+```
+
+## 8. Water: an active ingredient {.wide}
+
+Distilled water brews flat, sour coffee; hard tap water brews chalky coffee and scales the boiler. Three ions decide it:
+
+```cards cols=3 style=top
+Magnesium, Mg²⁺ | Small and highly charged, it binds strongly to fruity and floral compounds, and pulls them into the cup | green
+Calcium, Ca²⁺ | Pulls out heavier, creamy and chocolatey compounds; but with bicarbonate above about 80 mg/L it forms scale | blue
+Bicarbonate, HCO₃⁻ | The acid buffer. Too little, under 20 mg/L, tastes sharply sour; too much, over 80 mg/L, flattens the fruit to chalk | amber
 ```
 
 ## In short {.summary}
 
-Great coffee relies on selective chemical extraction. **Grind size** sets surface area and Darcy flow resistance, while **brew ratio** stops the shot inside the `18 to 22% EY` sweet spot. Meanwhile, **water minerals (`Mg²⁺` and `HCO₃⁻`)** tune aroma extraction and acidity.
+Great coffee is selective extraction. Grind sets the surface area and the flow, the brew ratio stops the shot in the 18 to 22 % window, and the water's minerals shape aroma and acidity.
 
-### Sour means early, bitter means late
+### Sour is early, bitter is late
 
-Acids dissolve first, sugars and Maillard melanoidins dissolve second, and dry astringent plant phenols dissolve last.
+Acids dissolve first, sugars next, and dry plant compounds last.
 
-### Higher pressure does not mean faster flow
+### More pressure is not more flow
 
-Above `9 bar`, water compresses the coffee puck and packs microscopic fines against the basket, slowing flow and causing severe channelling.
+Above 9 bar the puck compresses, fines block the basket, and the shot channels.
 
-### Water is an active solvent
+### Water is a solvent
 
-Without magnesium and calcium ions to grip flavour compounds and bicarbonate to buffer acids, even the finest coffee beans taste flat and sour.
+Without magnesium to grip flavour and bicarbonate to buffer acid, the best beans taste flat and sour.

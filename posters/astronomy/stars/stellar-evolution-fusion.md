@@ -1,139 +1,146 @@
 ---
 title: "The Life and Death of Stars: Fusion to Supernovae"
-subtitle: Hydrostatic equilibrium, the Hertzsprung-Russell diagram, stellar nucleosynthesis and cosmic remnants explained
-byline: Popular Astrophysics, Nuclear Physics & Stellar Evolution Explainer
+subtitle: The balance inside a star, the H-R diagram, where the elements come from, and what stars leave behind
+byline: Popular astrophysics explainer
 orientation: landscape
 columns: 3
 paper: a1
 width: 1750
 document_number: PO-038
-version: "1.0"
 colours:
   accent: "#c2410c"
   secondary: "#7c2d12"
 footer:
-  left: Stellar Evolution & Nucleosynthesis Explainer
+  left: The Life and Death of Stars
   centre: Popular Astrophysics Reference
-  right: Fusion Chains, Hertzsprung-Russell Diagram, Supernovae & Neutron Stars Guide
   qr: https://en.wikipedia.org/wiki/Stellar_evolution
-  qr-label: Stellar Evolution Overview
+  qr-label: Stellar evolution on Wikipedia
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 15 million K | Core temperature of the Sun where protons fuse into helium | 600M tonnes/sec | good |
-| 1.44 Suns | Chandrasekhar mass limit above which a White Dwarf collapses | electron degeneracy | bad |
-| Iron-56 | Nuclear binding energy peak where fusion stops releasing energy | star core dies | bad |
-| 10¹⁴ g/cm³ | Density of a Neutron Star (a sugar-cube of core weighs 400 million tonnes!) | neutron degeneracy | good |
+| Value | Label |
+|---|---|
+| 15 million K | The Sun's core, which fuses 600 million tonnes of hydrogen a second |
+| 1.4 Suns | The Chandrasekhar limit: no heavier white dwarf can exist |
+| Iron | Where fusion stops giving energy, and a massive star's core dies |
+| 1 day | How long a massive star spends burning silicon to iron |
 
 ## Introduction {.abstract}
 
-Dying stars forged every carbon atom in your body, every oxygen molecule you breathe and every gold ring on Earth. A star is a lifelong tug-of-war (**hydrostatic equilibrium**) between two giant forces. **Gravity** tries to crush the gas sphere inward, while **thermonuclear fusion pressure** (`E = mc²`) pushes outward from the core. Birth mass alone dictates how fast a star burns fuel and whether it leaves a **White Dwarf** or detonates as a **Supernova**.
+Every carbon atom in your body, the oxygen you breathe and the gold in a ring were made in stars. A star is a balance: **gravity** pulls it in, and the pressure of hot gas, kept hot by **fusion**, pushes it out. Its mass at birth decides how fast it burns and how it ends: as a **white dwarf**, a **neutron star** or a **black hole**.
 
-## 1. Stellar life cycles: birth mass is destiny {.wide}
+## 1. Mass is destiny {.wide}
 
-```figure
-@lanes
-Low-Mass (< 0.5 Suns) | *Molecular Cloud Core | *Red Dwarf (e.g. Proxima Centauri) | *Fully convective (burns 99% of H2) | Slowly fades to Helium Dwarf after 1–10 TRILLION years!
-Sun-Like (0.5 to 8 Suns) | *Molecular Cloud Core | *Main Sequence Yellow Star (~10B yrs) | *Red Giant (fuses He -> C & O) | Sheds Planetary Nebula -> leaves Earth-sized White Dwarf!
-Massive (> 8 Suns) | *Molecular Cloud Core | *Blue Supergiant (lives only ~10M yrs) | *Fuses onion shells H -> He -> C -> Si -> Iron-56 | Core-Collapse Supernova -> Neutron Star or Black Hole!
+```lanes
+Under 0.5 Suns | *Cloud core | *Red dwarf, such as Proxima Centauri | *Burns nearly all its hydrogen | Fades to a helium white dwarf, after trillions of years
+0.5 to 8 Suns | *Cloud core | *Main sequence: the Sun, 10 billion years | *Red giant: helium to carbon and oxygen | Planetary nebula, leaving an Earth-sized white dwarf
+Over 8 Suns | *Cloud core | *Blue supergiant, only millions of years | *Shells from hydrogen to iron | Supernova: a neutron star or a black hole
 ```
 
-[[CAPTION:Figure]] Massive stars hold 10 to 50 times more fuel than the Sun, yet extreme core pressures burn that supply in just a few million years.
+## 2. The H-R diagram
 
-## 2. The nuclear furnace: why Iron-56 kills massive stars
+Plot stars by brightness and surface temperature, hottest on the left, and they fall into groups:
 
-Inside main-sequence stars like our Sun, the **Proton-Proton (`p-p`) chain** fuses four Hydrogen nuclei (`¹H`) into one Helium-4 nucleus (`⁴He`). Because a Helium-4 nucleus weighs **0.7% less** than four separate protons, that missing mass converts directly into gamma-ray energy via Albert Einstein's `E = mc²`. In massive stars (`> 8` solar masses), the core grows hot enough to fuse heavier and heavier ash shells like an onion—until it hits **Iron (`⁵⁶Fe`)**:
-
-```figure
-@segments
-title: Onion-shell fusion time-to-live inside a 20-solar-mass star
-4 | 1. Hydrogen (10M yrs) | p-p / CNO | blue
-2 | 2. Helium (1M yrs) | 3-Alpha | teal
-2 | 3. C / Ne / O (1,000 yrs -> mos) | 1B K | amber
-2 | 4. Silicon -> Iron (Just 24 HOURS!) | Collapse! | red
+```plot type=scatter xlog=yes ylog=yes xinvert=yes labels=yes width=520 height=340 xtitle="Surface temperature (K)" ytitle="Brightness (Suns)"
+Sun | 5772 | 1 | 4 | Main sequence
+Vega | 9600 | 40 | 4 | Main sequence
+Sirius A | 9940 | 25 | 4 | Main sequence
+Proxima | 3042 | 0.0017 | 4 | Main sequence
+Spica | 25300 | 20000 | 4 | Main sequence
+Aldebaran | 3900 | 440 | 4 | Giants
+Betelgeuse | 3600 | 100000 | 4 | Supergiants
+Rigel | 12100 | 120000 | 4 | Supergiants
+Deneb | 8500 | 200000 | 4 | Supergiants
+Sirius B | 25000 | 0.056 | 4 | White dwarfs
 ```
 
-```chart type=bar title="Relative nuclear binding energy per nucleon (MeV)" unit=" MeV" max=11
-Deuterium (H-2) | 1
-Helium-4 (Alpha) | 7
-Carbon-12 | 8
-Iron-56 (Peak!) | 9
-Uranium-238 | 8
+[[CAPTION:Figure]] Most stars, the Sun among them, lie on the main sequence while they burn hydrogen.
+
+## 3. Why iron kills a star
+
+Four protons fuse into a helium-4 nucleus that is **0.7 % lighter**; the missing mass is energy, by $E = mc^2$. Each fusion up to iron releases energy, because the products are more tightly bound:
+
+```chart type=line title="Binding energy per nucleon" unit=" MeV" min=0 max=10 step=2 values=all height=240
+²H | 1.1
+⁴He | 7.07
+¹²C | 7.68
+¹⁶O | 7.98
+⁵⁶Fe | 8.79
+¹²⁰Sn | 8.5
+²⁰⁸Pb | 7.87
+²³⁸U | 7.57
 ```
+
+The peak is at iron and nickel. Past it, fusion **costs** energy, so an iron core cannot support itself.
 
 > [!WARNING]
-> Fusing elements lighter than **Iron-56** *releases* heat (`exothermic`), which props up the star against gravity. Fusing Iron-56 *consumes* heat (`endothermic`)! Once an iron core exceeds **`1.44 solar masses`**, fusion halts and the core collapses inward at **23% of light speed** in a quarter-second.
+> When the iron core passes about 1.4 Suns, it collapses at a quarter of light speed in a quarter of a second, and rebounds as a **supernova**.
 
-## 3. The Hertzsprung-Russell (`H-R`) diagram
+## 4. The onion before the bang
 
-Astronomers classify every star on a two-axis map plotting **Luminosity** (intrinsic brightness) against **Surface Temperature** (`O, B, A, F, G, K, M` spectral classes):
+A star of 20 Suns ends with shells of ash, each burning around the next:
 
-```lcd cols=1
-Luminosity (L/L_sun) ^
-       10^5          |  [Blue Supergiants]          [Red Supergiants]
-                     |   Rigel, Deneb                 Betelgeuse, Antares
-       10^2          |         \                   /  (Huge radius, cool surface)
-                     |          \  MAIN SEQUENCE  /
-        1.0 (Sun) ---|-----------*-[Sun (G2V)]---/
-                     |                \
-       10^-2         |  [White Dwarfs] \ [Red Dwarfs: Proxima Centauri]
-                     |   Sirius B         (Small, cool, burn for trillions of yrs)
-                     +----------------------------------------------------->
-                     30,000 K (O/B Blue)    6,000 K (G Yellow)   3,000 K (M Red)
-                                 <--- Surface Temperature (Hotter is LEFT!)
+```onion
+Iron | Inert: the core that collapses | red
+Silicon | Burns for about a day | amber
+Oxygen | Months | brown
+Neon and carbon | Years to a thousand years | teal
+Helium | A million years | blue
+Hydrogen | Ten million years | navy
 ```
 
-## 4. Where the periodic table comes from
+## 5. Where the elements come from
 
-How did the universe turn pure Big Bang **Hydrogen (`75%`)** and **Helium (`25%`)** into the 92 natural elements of the Periodic Table?
-
-```cards cols=2 style=label
-Carbon, Nitrogen & Oxygen (Stellar Cores) | Forged via the **Triple-Alpha Process** (`3 × ⁴He -> ¹²C`) and `CNO` cycle inside medium and massive stars, then blown into space by stellar winds and planetary nebulae
-Silicon, Calcium & Iron (Supernovae) | Built in the final silicon-burning shells of massive stars (`Type II` supernovae) and exploding **Type Ia White Dwarf** thermonuclear supernovae (our cosmic "standard candles")
-Gold, Platinum & Uranium (Kilonovae!) | Elements heavier than iron require **rapid neutron bombardment (`r-process`)** when two **Neutron Stars** spiral together and collide in a **Kilonova**
-Lithium, Beryllium & Boron (Cosmic Rays) | Too fragile to survive inside hot stellar cores; formed when high-energy **cosmic ray protons** smash into interstellar carbon and oxygen nuclei (**Cosmic Ray Spallation**)
+```elements cols=7
+H He Li C O Fe Au
 ```
 
-## 5. Comparing the four stellar remnants {.wide}
+```cards cols=1 style=label
+Big Bang | Hydrogen and helium, and a little lithium
+Stars | Carbon, nitrogen and oxygen, by the triple-alpha process and the CNO cycle, blown out by winds and planetary nebulae
+Supernovae | Silicon to iron, from the last shells of massive stars and from exploding white dwarfs
+Neutron star mergers | Gold, platinum and uranium, by rapid neutron capture (the r-process)
+Cosmic rays | Lithium, beryllium and boron, chipped off carbon and oxygen
+```
 
-When fusion stops, what holds a dead star up against gravity? **Quantum mechanics** (**Pauli Exclusion Principle**), until gravity overwhelms even quantum degeneracy pressure:
+## 6. What stars leave behind {.wide}
+
+When fusion stops, only quantum mechanics holds a dead star up: the **Pauli exclusion principle**, until gravity wins.
 
 ```compare
-| Brown Dwarf ("Failed Star") | White Dwarf (Dead Sun-like Core) | Neutron Star / Pulsar | Stellar-Mass Black Hole
-Progenitor star mass | `< 0.08` Solar Masses (`< 80` Jupiters) | **`0.5 to 8` Solar Masses** (`97%` of all stars!) | **`8 to ~25` Solar Masses** | **`> 25` Solar Masses**
-What halts gravity? | **Electron degeneracy pressure** (never got hot enough for `¹H` fusion) | **Electron degeneracy pressure** (quantum electrons refuse to share states) | **Neutron degeneracy pressure** + strong nuclear force repulsion | **Nothing!** Collapses past the Schwarzschild event horizon
-Physical diameter | `~100,000 km` (Jupiter-sized) | **`~12,000 km`** (1 Sun packed into **Earth's size**!) | **`~20 km`** (`1.5` Suns packed into **London's M25 ring**!) | Event horizon `~18 to 90 km` across
-Mass ceiling | `0.08 M☉` (above this, ignites as Red Dwarf) | **Chandrasekhar Limit (`1.44 M☉`)** | **Tolman-Oppenheimer-Volkoff Limit (`~2.2 to 3 M☉`)** | Unlimited (grows by accretion or mergers)
+| Brown dwarf | White dwarf | Neutron star | Black hole
+Star it came from | Under 0.08 Suns: never fused hydrogen | **0.5 to 8 Suns**: 97 % of stars | **8 to about 25 Suns** | **Over about 25 Suns**
+Held up by | Electron degeneracy | **Electron degeneracy** | **Neutron degeneracy** and the strong force | **Nothing**
+Size | About Jupiter's | **Earth's**, with a Sun's mass | **20 km**, with 1.5 Suns | Horizon 15 to 90 km
+Most it can weigh | 0.08 Suns, then it is a red dwarf | **1.4 Suns** (Chandrasekhar) | **About 2.2 to 2.9 Suns** (TOV) | No limit
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 7. Glossary {.wide}
 
-```cards cols=4 style=label
-M☉ & L☉ | Solar Mass (`1.989 × 10³⁰ kg` — 333,000 Earths) and Solar Luminosity (`3.828 × 10²⁶ Watts` of radiated power)
-p-p & CNO | Proton-Proton chain (main fusion path in Sun-like stars) and Carbon-Nitrogen-Oxygen cycle (dominant in stars > 1.3 M☉)
-H-R Diagram | Hertzsprung-Russell Diagram: fundamental astrophysics chart plotting stellar brightness against surface temperature/colour
-O B A F G K M | Spectral temperature classes from hottest Blue (`O`, >30,000 K) to coolest Red (`M`, ~2,800 K); the Sun is a `G2V` dwarf
-Type Ia vs Type II | Type Ia Supernova (White Dwarf exceeding 1.44 M☉ limit) vs Type II Supernova (iron core collapse of a >8 M☉ supergiant)
-r-process & s-process | Rapid neutron capture (in neutron star mergers/supernovae) and Slow neutron capture (in asymptotic giant branch stars)
-TOV Limit | Tolman-Oppenheimer-Volkoff Limit (~2.2–3 M☉): maximum mass a Neutron Star can support before collapsing into a Black Hole
-Pulsar & Magnetar | Rapidly spinning Neutron Star sweeping radio/X-ray beams like a lighthouse, or carrying a 10¹¹-Tesla magnetic field
+```glossary cols=4
+CNO cycle | Fusion through carbon, nitrogen and oxygen, in stars over 1.3 Suns
+H-R diagram | Hertzsprung-Russell diagram
+L☉, M☉ | The Sun's luminosity and mass
+OBAFGKM | Spectral classes from hottest to coolest; the Sun is G2V
+p-p chain | The proton-proton fusion of the Sun
+r-, s-process | Rapid and slow capture of neutrons
+Type Ia, Type II | Supernovae: an exploding white dwarf, and a collapsing core
+TOV limit | The heaviest a neutron star can be
 ```
 
 ## In short {.summary}
 
-A star is a nuclear fusion reactor balanced against its own gravity. **Low-mass stars** sip hydrogen for trillions of years, while **Sun-like stars** leave Earth-sized **White Dwarfs**. **Massive stars** fuse all the way to **Iron-56** before detonating as **supernovae** that seed the galaxy with heavy elements.
+A star is a fusion reactor held in by its own gravity. Small stars last trillions of years, Sun-like stars leave white dwarfs, and massive ones fuse to iron and explode, seeding the galaxy with the elements of life.
 
-### We are nuclear ash
+### We are made of ash
 
-Every atom heavier than helium in your blood and bones—iron in haemoglobin, calcium in teeth, carbon in Deoxyribonucleic Acid (`DNA`)—came from ancient stars.
+The iron in your blood, the calcium in your teeth and the carbon in your DNA all came from stars.
 
-### Bigger stars die younger
+### Big stars die young
 
-A 30-solar-mass blue supergiant shines 100,000 times brighter than the Sun, exhausting its fuel in 5 million years instead of 10 billion.
+A 30-Sun star shines 100,000 times brighter than the Sun and lasts 5 million years.
 
-### Gold comes from colliding neutron stars
+### Gold from collisions
 
-When two city-sized neutron stars merge, they fling out multiple Earth masses of pure gold, platinum and uranium in a radioactive **kilonova** fireball.
+Merging neutron stars throw out Earths' worth of gold and platinum in a kilonova.

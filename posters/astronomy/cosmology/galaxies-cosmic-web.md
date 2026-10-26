@@ -1,128 +1,131 @@
 ---
 title: "Galaxies, Dark Matter Halos and the Cosmic Web"
-subtitle: Hubble's tuning fork, Milky Way spiral anatomy, Vera Rubin's rotation curves, galaxy mergers and superclusters explained
-byline: Popular Astrophysics, Extragalactic Astronomy & Large-Scale Structure Explainer
+subtitle: Hubble's tuning fork, the anatomy of the Milky Way, flat rotation curves, mergers and our cosmic address
+byline: Popular astrophysics explainer
 orientation: landscape
-columns: 3
+columns: 4
 paper: a1
 width: 1750
 document_number: PO-046
-version: "1.0"
 colours:
   accent: "#4338ca"
   secondary: "#312e81"
 footer:
-  left: Galaxies & Cosmic Web Explainer
+  left: Galaxies and the Cosmic Web
   centre: Popular Astrophysics Reference
-  right: Hubble Tuning Fork, Milky Way Structure, Rotation Curves & Cosmic Web Guide
   qr: https://en.wikipedia.org/wiki/Galaxy
-  qr-label: Extragalactic Astronomy
+  qr-label: Galaxies on Wikipedia
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 2 Trillion | Estimated number of galaxies in the observable universe | 100B–400B stars/MW | good |
-| 220 km/s | Orbital speed of our Sun around the Milky Way centre (1 lap = 230M years!) | Cosmic Year | good |
-| ~5:1 Ratio | Dark Matter halo mass compared to ordinary stellar + gas mass in galaxies | Vera Rubin proof | good |
-| 4.5 B yrs | Time until the Milky Way and Andromeda collide to form an elliptical galaxy! | Milkomeda merger | good |
+| Value | Label |
+|---|---|
+| Hundreds of billions | Galaxies in the observable universe |
+| 230 km/s | Speed of the Sun round the Milky Way: one lap in 230 million years |
+| 5 : 1 | Dark matter to ordinary matter, across the universe |
+| 100,000 light-years | Across the Milky Way's disk of stars |
 
 ## Introduction {.abstract}
 
-A **galaxy** is a gravitationally bound island of stars, interstellar gas, cosmic dust and **Dark Matter** orbiting a common centre of mass. Our home galaxy—a barred spiral called the **Milky Way**—contains **100 to 400 billion stars** spanning `100,000 light-years`, embedded inside an invisible **Dark Matter Halo** ten times wider. Across the universe, galaxies are not scattered at random; gravity weaves them along a sponge-like **Cosmic Web** of filaments, supercluster nodes (`Laniakea`) and `150-million-light-year` voids.
+A **galaxy** is an island of stars, gas, dust and **dark matter**, bound by its own gravity. Ours, the **Milky Way**, is a barred spiral of 100 to 400 billion stars, inside a dark matter halo ten times wider. Galaxies are not scattered at random: gravity has strung them along a sponge-like **cosmic web** of filaments and clusters, round voids hundreds of millions of light-years across.
 
-## 1. Anatomy of our home: the Milky Way barred spiral (`SBbc`) {.wide}
+## 1. The Milky Way, to scale
 
-We live *inside* the Milky Way's dusty disk (`26,000 light-years` from the centre in the **Orion Spur**). Mapping our own galaxy required `21 cm` radio telescopes, infrared surveys (`Spitzer`/`WISE`) and **Gaia** 3D astrometry of 1.8 billion stars:
+We live inside the disk, 26,000 light-years from the centre, in the Orion Spur. Mapping it took 21 cm radio surveys, infrared telescopes, and Gaia's positions for nearly two billion stars.
 
-```figure
-@segments
-title: From the Milky Way's central black hole outward to the Dark Matter Halo (Diameter of visible stellar disk ≈ 100,000 light-years)
-1 | 1. Galactic Centre: Sagittarius A* (4.3M M☉ Black Hole) & Nuclear Cluster | Core (0 ly) | red
-2 | 2. Central Peanut Bar & Bulge (10,000 ly): Old metal-rich & metal-poor stars | Bar | amber
-3 | 3. Thin & Thick Stellar Disk (Radius 50,000 ly; only 1,000 ly thick!): 4 Spiral Arms + Sun at 26k ly | Spiral Disk | blue
-2 | 4. Stellar Halo (150,000 ly): 150+ Ancient Globular Clusters & Stellar Streams | Pop II Halo | teal
-2 | 5. Invisible Dark Matter Halo (~1,000,000 ly across!): 85% of the Milky Way's total mass (~1.5 Trillion M☉)! | Dark Halo | purple
+```sizes shape=circle nested=yes unit=" ly"
+Dark matter halo | 1000000 | About 85 % of the mass, 1 to 1.5 trillion Suns | purple
+Stellar halo | 300000 | Globular clusters and old star streams | teal
+Disk | 100000 | Four spiral arms, only 1,000 ly thick | blue
+Bar and bulge | 10000 | Old stars round the centre | amber
 ```
 
-- **Why don't spiral arms wind up tightly and disappear after a few rotations ("The Winding Dilemma")?** Because spiral arms are **not fixed solid spokes** of stars! As **Chia-Chiao Lin and Frank Shu** explained, spiral arms are **density waves**—cosmic traffic jams moving slowly through the disk. Gas clouds pile up as they enter the traffic jam, compress to trigger bright blue star formation (lighting up the arm!), and continue out the other side.
+At the centre is **Sagittarius A***, a black hole of 4.3 million Suns.
 
-## 2. Comparing the three major galaxy classes (Hubble's tuning fork) {.wide}
+Why do the arms not wind up as the disk turns? Because they are **density waves**, not fixed spokes: traffic jams that gas clouds drive into, compress, and light up with new blue stars.
 
-In 1926, **Edwin Hubble** arranged galaxies into his famous **Tuning Fork Diagram**:
+## 2. Hubble's tuning fork
 
-```compare
-| Spiral & Barred Spiral Galaxies (`Sa–Sc` / `SBa–SBc`) | Elliptical Galaxies (`E0` Spherical to `E7` Cigar) | Lenticular (`S0`) & Irregular (`Irr` / Dwarf) Galaxies
-Visual morphology | Flat rotating disk with dusty spiral arms + central bulge (`2/3` have a central bar!) | Smooth, featureless 3D ellipsoids ranging from spheres (`E0`) to rugby balls (`E7`) | **Lenticular (`S0`)**: Disk + bulge with no spiral arms; **Irregular**: Chaotic, asymmetric blobs
-Star formation rate | **Active!** `1 to 5` new solar masses of stars born per year in spiral arms | **"Red and Dead"!** Almost zero new star formation; dominated by old red/yellow stars | **Irregulars (`LMC/SMC`)**: Bursting with new blue stars! **Lenticulars**: Mostly quenched
-Cold gas & dust content | **Rich (`10 to 20%` of disk mass)** in cold `H I` and `H₂` molecular clouds | **Virtually none (`< 1%`)**; filled with hot `10⁷ K` X-ray-emitting plasma | Irregulars are up to **50% gas**; Lenticulars lost their gas via ram-pressure stripping
-Stellar orbital motion | **Ordered rotation**: all disk stars orbit in the same flat plane (`v ≈ 200–250 km/s`) | **Random 3D swarm orbits** (like bees in a beehive; supported by velocity dispersion `σ`) | Mix of rotation and tidal distortion from larger neighbouring galaxies
-Where they are found & how they form | Common in **low-density field environments** and galaxy group outskirts (`Milky Way`, `M31`, `Whirlpool M51`) | Dominate the crowded **cores of rich galaxy clusters** (`M87` in Virgo)—built by **major mergers of spirals**! | **Dwarf galaxies** are the most abundant galaxies by number (`Sagittarius Dwarf`, `Magellanic Clouds`)
-```
-
-## 3. Vera Rubin and the flat rotation curve proof of dark matter
-
-In our Solar System, planets obey **Keplerian decline (`v ∝ 1 / √r`)**: Neptune (`5.4 km/s`) orbits nearly **9 times slower** than Mercury (`47.4 km/s`) because `99.8%` of the mass sits in the Sun. In the 1970s, **Vera Rubin and Kent Ford** measured orbital speeds out to the edges of **Andromeda (`M31`)** and dozens of spiral galaxies—and found a shock:
-
-```chart type=line title="Galaxy Orbital Speed vs Radius (km/s): Expected Keplerian vs Observed!" unit=" km/s" min=0 max=260 step=65 height=180 colours=red,blue values=last
-series: Expected (Stars Only), Observed (Vera Rubin)
-2kpc | 180 | 190
-5kpc | 210 | 220
-10kpc | 150 | 225
-20kpc | 105 | 225
-30kpc | 85 | 230
-```
-
-> [!IMPORTANT]
-> Look at the blue curve above: stars at the far outer edge of a galaxy orbit **just as fast (`~225 km/s`)** as stars near the centre! By Newton's law (`v = √(GM(r) / r)`), a flat velocity curve (`v ≈ constant`) proves that enclosed mass `M(r)` keeps growing linearly with radius far beyond the visible stars—embedded in a giant **Dark Matter Halo**!
-
-## 4. Galaxy evolution: mergers, quasars & `AGN` feedback
+Edwin Hubble sorted galaxies by shape in 1926: ellipticals on the handle, then spirals with and without a bar on the two prongs.
 
 ```mermaid
 flowchart LR
-  Web["1. Cosmic Web Filaments\nPrimordial Dark Matter halos\npull cold gas streams together\ninto infant dwarf galaxies"] --> Spiral["2. Star-Forming Spiral Disk\nAccretes gas smoothly;\nDensity waves form spiral arms\n(Milky Way & Andromeda today)"]
-  Spiral --> Collide["3. Major Galaxy Merger!\nTwo spirals collide over 1B yrs;\nStars never hit each other, but\ngas clouds slam & trigger Starburst!"]
-  Collide --> Quasar["4. Quasar / AGN Feedback\nGas floods central Black Holes;\nRelativistic jets & winds blow\nremaining cold gas out of galaxy!"]
-  Quasar --> Ellip["5. Giant Elliptical ('Red & Dead')\nOrbits scrambled into 3D swarm;\nStar formation quenched forever\n(e.g. M87 or future Milkomeda)"]
+  E0["E0"] --> E3["E3"] --> E7["E7"] --> S0["S0 lenticular"]
+  S0 --> Sa["Sa"] --> Sb["Sb"] --> Sc["Sc"]
+  S0 --> SBa["SBa"] --> SBb["SBb"] --> SBc["SBc"]
 ```
 
-[[CAPTION:Figure]] When the **Milky Way and Andromeda collide in 4.5 billion years**, individual stars will almost never hit each other! Instead, gravity will fling stars into tidal tails and merge both galaxies into a giant **Elliptical Galaxy (`Milkomeda`)**.
+The sequence is not one of age: Hubble's "early" and "late" types are only names.
 
-## 5. Our cosmic address in the Cosmic Web {style=card colour=blue}
+## 3. Rotation curves: the evidence for dark matter
 
-```checklist
-[x] **1. Solar System & Orion Arm**: Located `26,000 light-years` (`8 kiloparsecs`) from the Milky Way's centre, orbiting once every `230 million years`
-[x] **2. The Local Group (`Diameter ~10 Million ly`)**: Over `80` bound galaxies dominated by two giants (**Andromeda** and the **Milky Way**) plus **Triangulum (`M33`)** and the **Magellanic Clouds**
-[x] **3. Virgo Supercluster (`Diameter ~110 Million ly`)**: Our Local Group falls toward the **Virgo Cluster** (`1,300+` galaxies anchored by giant elliptical **`M87`** at `54 million light-years`)
-[x] **4. Laniakea Supercluster (`Diameter ~520 Million ly`)**: Mapped by **Brent Tully (`2014`)**—a basin of `100,000 galaxies` (`10¹⁷ M☉`) flowing along cosmic web filaments toward the **Great Attractor**!
+In the Solar System, orbits slow with distance: Neptune moves at 5.4 km/s, nine times slower than Mercury, because the Sun holds nearly all the mass. In the 1970s **Vera Rubin and Kent Ford** measured stars and gas far out in Andromeda and other spirals. Their speed did not fall at all.
+
+```plot type=function from=0.5 to=30 width=360 height=260 xtitle="Distance from the centre (kpc)" ytitle="Orbital speed (km/s)"
+curve: Observed | 230 * (1 - exp(-x / 2.5))
+curve: Expected from stars and gas | 587 * x / pow(x * x + 9, 0.75)
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+> [!IMPORTANT]
+> A flat curve means the mass inside each radius keeps growing in step with the radius, far beyond the last stars: each galaxy sits in a **dark matter halo**.
 
-```cards cols=4 style=label
-MW, M31 & M87 | The Milky Way (our barred spiral), Messier 31 (Andromeda Galaxy) and Messier 87 (giant elliptical at the core of the Virgo Cluster)
-Sa..Sc, SBa..SBc, E0..E7 | Hubble Tuning Fork classes: unbarred spirals (`Sa–Sc`), barred spirals (`SBa–SBc`) and ellipticals (`E0` sphere to `E7` elongated)
-kpc & Mpc | Kiloparsec (`3,260 light-years`, standard galaxy scale) and Megaparsec (`3.26 million light-years`, intergalactic scale)
-LMC & SMC | Large and Small Magellanic Clouds: irregular satellite galaxies orbiting our Milky Way at `160,000` and `200,000 light-years`
-AGN & Quasar | Active Galactic Nucleus and Quasi-Stellar Object: a supermassive black hole accreting gas and regulating host galaxy star formation
-SFR & Starburst | Star Formation Rate (solar masses of new stars per year; `~2 M☉/yr` in Milky Way vs `100+ M☉/yr` in colliding **Starburst** galaxies)
-MOND vs CDM | Modified Newtonian Dynamics (alternative gravity hypothesis) vs Cold Dark Matter (standard halo model supported by CMB & Bullet Cluster)
-Cosmic Web & Void | Filamentary network of dark matter and galaxy superclusters surrounding `100-to-300-million-light-year` underdense **Cosmic Voids**
+## 4. Our cosmic address {style=card colour=blue}
+
+```onion
+Solar System | 26,000 ly from the galactic centre | amber
+Milky Way | 100,000 ly across | blue
+Local Group | 80 galaxies, 10 million ly | teal
+Virgo Supercluster | M87 at 54 million ly | navy
+Laniakea | 100,000 galaxies, 520 million ly | purple
+```
+
+Laniakea, mapped by Brent Tully in 2014, is a basin of galaxies that all flow towards the Great Attractor.
+
+## 5. Three kinds of galaxy {.wide}
+
+```compare
+| Spirals and barred spirals | Ellipticals | Lenticulars and irregulars
+Shape | A flat, turning disk of dusty arms round a bulge. Two in three have a bar | Smooth, featureless, from round (E0) to cigar-shaped (E7) | **Lenticular**: a disk and bulge with no arms. **Irregular**: no order at all
+New stars | **Forming**: 1 to 5 Suns' worth a year | **"Red and dead"**: almost none | **Irregulars** blaze with them. **Lenticulars** have mostly stopped
+Gas and dust | **Rich**: 10 to 20 % of the disk is cold gas | **Almost none** cold, but hot X-ray gas at 10 million K | Irregulars up to 50 % gas. Lenticulars lost theirs
+How stars move | **In order**: one plane, one direction, 200 to 250 km/s | **At random**, like bees round a hive | Rotation, distorted by neighbours
+Where, and how made | Thin surroundings: the Milky Way, Andromeda, M51 | **Cores of rich clusters**, built by mergers: M87 in Virgo | Dwarfs are the commonest galaxies: the Magellanic Clouds
+```
+
+## 6. How galaxies change {.wide}
+
+```flow
+[Gas in filaments|blue] -cools-> [Spiral disk|blue] -merger-> [Starburst|amber] -gas floods centre-> [Quasar|red] -gas blown out-> [Elliptical|grey]
+In a merger the stars almost never touch: they are too far apart. The gas clouds collide, form stars in a burst, and feed the central black hole, whose outflow then stops star formation.
+```
+
+The Milky Way and Andromeda close at 110 km/s. A 2025 study using Gaia and Hubble gives them only about even odds of merging in the next 10 billion years.
+
+## 7. Glossary {.wide}
+
+```glossary cols=4
+AGN | Active galactic nucleus: a black hole feeding on gas
+kpc, Mpc | Kiloparsec (3,260 ly) and megaparsec (3.26 million ly)
+LMC, SMC | The Large and Small Magellanic Clouds
+M31, M87 | Andromeda, and the giant elliptical in Virgo
+MOND | Modified Newtonian Dynamics, an alternative to dark matter
+Quasar | The brightest kind of AGN
+SFR | Star formation rate, in Suns' worth a year
 ```
 
 ## In short {.summary}
 
-Galaxies are dynamic ecosystems shaped by **Dark Matter** and **cosmic collisions**. **Spiral galaxies** form new stars along rotating density-wave arms, while **Vera Rubin's flat rotation curves** prove that galaxies sit inside massive Dark Matter halos. Over billions of years, **major mergers and black hole feedback** transform spirals into giant **elliptical galaxies**.
+Galaxies are shaped by dark matter and by collisions. Spirals make stars along their arms, flat rotation curves show the halos they sit in, and mergers turn spirals into ellipticals.
 
-### Why spiral arms glow blue and ellipticals glow red
+### Blue arms, red ellipticals
 
-Hot, massive blue stars (`O` and `B` types) live only `10 million years`—so blue spiral arms mark recent star birth, whereas red ellipticals contain only old low-mass stars.
+Blue O and B stars live only about 10 million years, so blue light marks new stars. Ellipticals hold only old, red ones.
 
-### Stars never collide when galaxies crash
+### Stars miss, gas collides
 
-Even during a head-on collision between the Milky Way and Andromeda, stars sit so far apart that the two stellar disks pass through each other like ghosts. Only the giant interstellar gas clouds collide!
+When galaxies collide, their stars pass each other by. Only the gas clouds meet.
 
-### Black holes act as galactic thermostats
+### Black holes keep the heat
 
-Every large galaxy's central black hole weighs `~0.1 to 0.2%` of its stellar bulge (**`M–σ` Relation**), because `AGN` jets heat and expel gas whenever the galaxy grows too fast.
+A galaxy's central black hole weighs about 0.1 to 0.5 % of its bulge, because its outflows stop the galaxy growing too fast.

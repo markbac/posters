@@ -1,0 +1,105 @@
+name: Posters
+
+# Build every poster and its one-page PDF. On a pull request the PDFs are kept as an artifact to look at.
+# On a push to main (a merged pull request), the next version is tagged and the PDFs are published
+# as a GitHub release. The tag is made before the build, so each PDF prints that version under its footer.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: posters-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # version: git needs the tags
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Every poster is listed in py-doc.yml
+        run: python scripts/check_posters.py
+      - name: Next version
+        id: version
+        run: |
+          last=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+          if [ -z "$last" ]; then
+            tag=v1.0.0
+          else
+            IFS=. read -r major minor patch <<< "${last#v}"
+            tag="v$major.$((minor + 1)).0"
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Next version: $tag"
+      - name: Tag the build, so the posters print its version
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: git tag "${{ steps.version.outputs.tag }}"
+      - name: Install py-doc
+        run: python -m pip install "py-doc @ git+https://github.com/markbac/py-doc"
+      - name: Build the tool image (diagrams and the Chromium that prints the PDFs)
+        run: py-doc tools build
+      - name: Every poster and its PDF
+        run: py-doc poster --pdf
+      - name: Each PDF is one page
+        run: |
+          fail=0
+          for pdf in $(find build -name '*.pdf' | sort); do
+            pages=$(python -c "import re, sys; print(len(re.findall(rb'/Type\s*/Page[^s]', open(sys.argv[1], 'rb').read())))" "$pdf")
+            if [ "$pages" != "1" ]; then echo "::error file=$pdf::$pages pages"; fail=1; fi
+          done
+          exit $fail
+      - name: Gather the PDFs in one folder, and zip them
+        run: |
+          mkdir -p dist
+          find build -name '*.pdf' -exec cp {} dist/ \;
+          (cd build && zip -qr ../dist/posters-html.zip . -i '*.html')
+          (cd dist && zip -q posters-pdf.zip *.pdf)
+          ls -la dist
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: posters
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: posters
+          path: dist
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          {
+            echo "Posters built from ${GITHUB_SHA::7}."
+            echo
+            echo "Each poster is a one-page PDF, in its own paper size (A1 unless the poster says otherwise)."
+            echo "\`posters-pdf.zip\` has them all, and \`posters-html.zip\` has the self-contained HTML pages."
+          } > notes.md
+          gh release create "$TAG" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Posters $TAG" \
+            --notes-file notes.md

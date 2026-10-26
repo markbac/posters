@@ -1,133 +1,150 @@
 ---
 title: "How Astronomers Find and Study Exoplanets"
-subtitle: Transit light curves, Doppler radial velocity wobble, transmission spectroscopy and habitable zones explained
-byline: Popular Astrophysics, Planetary Science & Observational Astronomy Explainer
+subtitle: Transits, stellar wobbles, habitable zones and reading alien air with JWST
+byline: Planetary science explainer
 orientation: portrait
 columns: 2
 paper: a1
 width: 1200
 document_number: PO-041
-version: "1.0"
 colours:
   accent: "#0d9488"
   secondary: "#0f766e"
 footer:
-  left: Exoplanet Discovery & Atmospheres Explainer
-  centre: Popular Astrophysics Reference
-  right: Transit Photometry, Radial Velocity, JWST Spectroscopy & Habitable Zone Guide
+  left: Finding Exoplanets
+  centre: Planetary Science Reference
   qr: https://exoplanets.nasa.gov/
-  qr-label: Exoplanet Exploration Guide
+  qr-label: NASA exoplanet exploration
 ---
 
 ## Key figures {.stats style=tiles}
 
-| Value | Label | Change | Verdict |
-|---|---|---|---|
-| 5,700+ | Confirmed exoplanets discovered across the Milky Way since 1992 | billions exist! | good |
-| 0.0084% | Brightness dip (84 parts per million) when an Earth-sized planet transits a Sun | Kepler precision | good |
-| 9 cm/s | Reflex wobble speed of the Sun caused by Earth's gravity (walking pace!) | 12.5 m/s for Jupiter | good |
-| 4.24 ly | Distance to the closest known exoplanet, Proxima Centauri b | habitable zone | good |
+| Value | Label |
+|---|---|
+| Over 6,000 | Confirmed exoplanets, since the first in 1992 |
+| 84 ppm | Dimming when an Earth crosses a Sun-like star |
+| 9 cm/s | How fast Earth makes the Sun wobble |
+| 4.24 ly | To the nearest exoplanet, Proxima Centauri b |
 
 ## Introduction {.abstract}
 
-Why did it take until the 1990s to confirm planets around other stars? Stars outshine their planets by **one billion to ten billion times** in visible light—like spotting a firefly beside a searchlight from `1,000 km` away. Instead of trying to see the planet directly, astronomers watch the **host star** for two tiny signatures. A periodic **brightness dip** occurs when a planet crosses the star (**Transit Photometry**), while a **Doppler colour shift** reveals the star wobbling (**Radial Velocity**).
+A star outshines its planets a billion times or more: a firefly beside a searchlight, seen from 1,000 km. So astronomers mostly watch the **star**. A planet passing in front dims it, a **transit**, and a planet's pull makes it wobble, which shifts its colour by the **Doppler effect**. Together they give a planet's size, mass and density.
 
-## 1. The four exoplanet detection methods {.wide}
+## 1. Four ways to find a planet {.wide}
 
-Combining **Transit Photometry** (planet **radius**) with **Radial Velocity** (planet **mass**) lets astronomers calculate bulk **density (`ρ = M / V`)**. That density reveals whether a distant world is a rocky Earth, an ocean water-world, or a puffy gas giant!
+Size from a transit and mass from the wobble give **density**: rock, water world or gas.
 
 ```compare
-| 1. Transit Photometry (`~75%` of finds) | 2. Radial Velocity / Wobble (`~19%`) | 3. Gravitational Microlensing (`~4%`) | 4. Direct Coronagraphic Imaging (`~1.5%`)
-Physical principle | Planet crosses star's disk, blocking a fraction `(R_planet / R_star)²` of starlight | Star and planet orbit a common centre of mass (`barycentre`), shifting starlight blue/red | Foreground star + planet bend and magnify light from a distant background star | Starlight-blocking mask (**coronagraph**) + adaptive optics reveal glowing young planets
-What it measures | **Planet radius (`R_p`)** and orbital period `P` | **Minimum planet mass (`M_p sin i`)** and eccentricity | Planet-to-star mass ratio at wide `1 to 10 AU` orbits (even free-floating rogue planets!) | Direct infrared brightness, temperature and orbital motion (`e.g. HR 8799` system)
-Sensitivity sweet spot | Close-in planets whose orbital plane aligns edge-on (`i ≈ 90°`) with Earth | Massive planets or rocky planets orbiting lightweight **Red Dwarf (`M-dwarf`)** stars | One-time alignments toward the crowded **Milky Way galactic bulge** | Giant young planets (`> 2 Jupiters`) orbiting far (`> 10 AU`) from their host star
-Key observatories | `Kepler`, `TESS`, `CoRoT` and `PLATO` | `HARPS`, `ESPRESSO` (Chile) and `Keck/KPF` | `OGLE`, `MOA` and upcoming `Nancy Grace Roman` | `JWST`, `VLT/SPHERE` and `Gemini Planet Imager`
+| Transit (about 74 % of finds) | Radial velocity (19 %) | Microlensing (4 %) | Direct imaging (1 to 2 %)
+How it works | The planet blocks a share of the star's light, (R_p / R_s)² | Star and planet circle their common centre, so the star's light shifts blue then red | A star and its planet bend and brighten the light of a star far behind | A mask blocks the starlight; adaptive optics show the planet's own glow
+It measures | **Radius** and period | **Minimum mass** and eccentricity | Mass ratio, even for rogue planets | Brightness, temperature, orbit
+Best for | Close planets whose orbits are edge-on to us | Heavy planets, and rocky ones round red dwarfs | Planets 1 to 10 AU out, towards the galactic bulge | Young giant planets far from their star
+Telescopes | Kepler, TESS, PLATO | HARPS, ESPRESSO, Keck | OGLE, MOA, Roman | JWST, VLT SPHERE, Gemini
 ```
 
-## 2. Reading a transit light curve: radius, orbit & rings
+## 2. Reading a transit
 
-When the **Kepler** or **Transiting Exoplanet Survey Satellite (`TESS`)** mission stares at hundreds of thousands of stars simultaneously, a periodic box-shaped dip in brightness reveals an orbiting world:
-
-```lcd cols=1
-Relative Starlight Brightness
- 1.0000 |-------------                 -------------                 ------
-        |             \               /             \               /
- 0.9900 |              \_____________/               \_____________/
-        |              |<-- Transit ->|              |<-- Next Dip ->|
-        +-----------------------------------------------------------------> Time
-        |<------------- Orbital Period P (gives distance a via Kepler's 3rd Law) ------------->|
-
-What the depth of the dip tells us:
-  Transit Depth (Delta_F) = (R_planet / R_star)^2
-  - Jupiter-sized planet crossing a Sun-like star -> 1.0% dip   (10,000 ppm — detectable from ground!)
-  - Earth-sized planet crossing a Sun-like star   -> 0.0084% dip (84 ppm — requires space telescope!)
+```chart type=line title="A star's brightness through a transit" min=0.985 max=1.002 step=0.005 markers=no axis="Relative brightness" height=220
+0 h | 1.000
+1 h | 1.000
+2 h | 1.000
+2.5 h | 0.990
+3 h | 0.990
+3.5 h | 0.990
+4 h | 0.990
+4.5 h | 1.000
+5 h | 1.000
+6 h | 1.000
 ```
 
-```chart type=bar title="Confirmed exoplanets by size / mass category (%)" unit="%" max=45
-Neptune-Like | 35
-Gas Giants | 31
+```equation
+title: Depth of a transit
+\Delta F = \left( \frac{R_p}{R_s} \right)^2
+\Delta F | Fraction of light blocked |
+R_p, R_s | Radii of the planet and the star | km
+```
+
+A Jupiter crossing the Sun blocks 1 %, which is seen from the ground. An Earth blocks 0.0084 %, which needs a space telescope. The time between transits gives the orbit, by Kepler's third law.
+
+## 3. What the planets are like
+
+```chart type=bar title="Confirmed exoplanets by type" unit=" %" max=40
+Neptune-like | 35
+Gas giants | 31
 Super-Earths | 30
-Rocky / Earth-Size | 4
+Rocky, Earth-sized | 4
 ```
 
-## 3. Surprising worlds not found in our solar system
-
-Before 1995, astronomers assumed every planetary system looked like ours (small rocky planets close in, gas giants far out). Exoplanet surveys uncovered completely alien architectures:
+Small rocky planets are the hardest to find, not the rarest.
 
 ```cards cols=2 style=top
-Hot Jupiters (3-Day Roasting Gas Giants) | Like **51 Pegasi b** (the first planet found around a Sun-like star in 1995): Jupiter-mass gas giants orbiting **10× closer to their star than Mercury**, roasted to `1,500 K` with supersonic winds of vaporised iron and silicate glass rain! | amber
-Super-Earths & Mini-Neptunes (The Most Common Worlds!) | The galaxy's most abundant planets are **`1.2 to 3.5` times Earth's radius**—a size completely missing from our Solar System! Below `~1.6 R⊕` they are dense rocky **Super-Earths**; above `~2.0 R⊕` they retain thick hydrogen/steam envelopes (**Mini-Neptunes** / **Hycean** worlds) | teal
-Tidally Locked "Eyeball" Worlds (`TRAPPIST-1`) | Around cool Red Dwarf stars, the habitable zone is so close that gravity locks one side of the planet in **permanent daylight** and the other in **eternal night**, ringed by a permanent twilight terminator | blue
-Lava Worlds & Ultra-Short-Period Planets | Rocky planets like **55 Cancri e** and **Kepler-78b** that complete an entire "year" in just **`8 to 18 hours`**, with dayside oceans of molten magma | red
+Hot Jupiters | Giants eight times closer to their star than Mercury is to the Sun, at 1,500 K. 51 Pegasi b, the first round a Sun-like star, in 1995 | amber
+Super-Earths, mini-Neptunes | The commonest planets are 1.2 to 3.5 times Earth's size, a size our Solar System lacks. Below about 1.6 they are rock; above 2, they keep thick gas | teal
+Eyeball worlds | Round red dwarfs the habitable zone is so close that tides lock one face in daylight and the other in night | blue
+Lava worlds | 55 Cancri e and Kepler-78b orbit in 18 and 8.5 hours, with oceans of magma on their day sides | red
 ```
 
-## 4. How `JWST` sniffs alien air: transmission spectroscopy {.wide}
+## 4. Habitable zones: TRAPPIST-1
 
-How can we tell if an exoplanet `100 light-years` away has water vapour or carbon dioxide? During a transit, a sliver of starlight filters through the planet's upper **atmosphere** on its way to the **James Webb Space Telescope (`JWST`)**:
+The habitable zone is where water could be liquid on a planet's surface. Round a cool red dwarf it lies very close in. TRAPPIST-1 has seven Earth-sized planets, three or four in its zone, all closer than Mercury is to the Sun.
 
-```mermaid
-flowchart LR
-  Star["1. Host Star Spectrum\nFull rainbow of infrared wavelengths\nshines toward Earth"] --> Atm["2. Exoplanet Atmosphere Rim\nChemical molecules absorb their\nexact quantum vibrational wavelengths!"]
-  Atm --> JWST["3. JWST Spectrograph (NIRSpec)\nCompares in-transit spectrum\nagainst out-of-transit starlight"]
-  JWST --> Finger["4. Chemical Barcodes Identified!\nH2O (Water), CO2 (4.3 um),\nCH4 (Methane), SO2 (Photochemistry)"]
+```orbits star=TRAPPIST-1 unit=" AU" habitable=0.025-0.05
+orbit: b | 0.0115 | grey
+orbit: c | 0.0158 | grey
+orbit: d | 0.0223 | teal
+orbit: e | 0.0293 | green
+orbit: f | 0.0385 | green
+orbit: g | 0.0469 | green
+orbit: h | 0.0619 | blue
 ```
 
-[[CAPTION:Figure]] Because every molecule absorbs specific infrared wavelengths, the planet appears slightly *larger* at wavelengths absorbed by its air—turning the transit into a chemical barcode scanner.
+> [!WARNING]
+> Red dwarfs are 75 % of all stars, and their planets are easy to find. But their flares may strip the air from close planets.
 
-## 5. The habitable zone & biosignature checklist {style=card colour=teal}
+## 5. Reading alien air with JWST {.wide}
+
+During a transit, a little starlight passes through the planet's atmosphere. Each molecule absorbs its own infrared wavelengths, so the planet looks slightly larger at those: the transit becomes a chemical barcode.
+
+```flow
+[Starlight|amber] -through the planet's air-> [Absorbed at each molecule's wavelengths|teal] -JWST NIRSpec-> [In transit compared with out|blue] -> [H₂O, CO₂ at 4.3 µm, CH₄, SO₂|green]
+```
+
+In 2022 JWST found carbon dioxide, and sulphur dioxide made by starlight, in the air of the hot Saturn **WASP-39b**.
+
+## 6. Signs of life {style=card colour=teal}
 
 ```checklist
-[x] **The "Goldilocks" Habitable Zone**: Orbital distance where surface temperatures allow **liquid water (`0 to 100 °C`)** under sufficient atmospheric pressure
-[x] **Red Dwarf (`M-Dwarf`) Trade-Off**: Red dwarfs make up `75%` of stars and make transits easy to spot, but violent **ultraviolet (`UV`) superflares** can strip away a close planet's atmosphere
-[x] **Chemical Disequilibrium (The Real Biosignature)**: Finding **Oxygen (`O₂`) / Ozone (`O₃`)** *simultaneously* with a reducing gas like **Methane (`CH₄`)**—because they destroy each other rapidly unless living organisms replenish both!
-[x] **Next-Gen Direct Flagship (`Habitable Worlds Observatory`)**: Future `6-to-8-metre` space telescope using an internal coronagraph or external **Starshade** to image Earth twins around Sun-like stars
+[x] **Liquid water**: a planet in the habitable zone, with enough air pressure
+[x] **Chemical disequilibrium**: oxygen or ozone together with methane, which destroy each other unless something keeps making both
+[x] **More than one line of evidence**: volcanoes and sunlight can make oxygen or methane alone
+[ ] **An Earth twin imaged**: the Habitable Worlds Observatory, a 6 to 8 m space telescope with a coronagraph, planned for the 2040s
 ```
 
-## 6. Acronym guide: every term defined {.wide}
+## 7. Glossary {.wide}
 
-```cards cols=4 style=label
-R⊕ & M⊕ | Earth Radius (`6,371 km`) and Earth Mass (`5.97 × 10²⁴ kg`): standard units for rocky and Super-Earth exoplanets
-R_J & M_J | Jupiter Radius (`11.2 R⊕`) and Jupiter Mass (`318 M⊕`): standard units for giant exoplanets
-ppm & m/s | Parts per million (`10⁻⁶` brightness dip in transit light curves) and metres per second (Doppler radial velocity wobble speed)
-RV & TTV | Radial Velocity (Doppler star-wobble method) and Transit Timing Variation (gravitational tugs between multi-planet siblings)
-TESS & Kepler | Transiting Exoplanet Survey Satellite (all-sky nearby star survey) and Kepler Space Telescope (found >2,700 exoplanets)
-HARPS & ESPRESSO | High Accuracy Radial velocity Planet Searcher and Echelle SPectrograph for Rocky Exoplanets (European Southern Observatory)
-JWST & HWO | James Webb Space Telescope (6.5 m infrared observatory) and Habitable Worlds Observatory (planned 2040s Earth-twin imager)
-HZ & AU | Circumstellar Habitable Zone (liquid-water orbital belt) and Astronomical Unit (`149.6 million km` Earth-Sun distance)
+```glossary cols=4
+AU | Astronomical unit, 149.6 million km
+HZ | Habitable zone
+M⊕, R⊕ | Earth's mass and radius
+ppm | Parts per million
+RV | Radial velocity, the Doppler wobble method
+TESS | Transiting Exoplanet Survey Satellite
+TTV | Transit timing variation: tugs between sibling planets
+HWO | Habitable Worlds Observatory
 ```
 
 ## In short {.summary}
 
-Astronomers rarely see exoplanets directly. Instead, **transit light curves** measure a planet's shadow (`radius`), **Doppler star wobble** measures its gravitational tug (`mass`), and **transmission spectroscopy** reads the chemical barcode of starlight filtering through alien skies.
+Transits give a planet's size, wobbles its mass, and the starlight through its air its chemistry.
 
 ### Planets outnumber stars
 
-Kepler statistics prove that on average **every star in the Milky Way hosts at least one planet**, meaning over **100 billion planets** orbit in our galaxy alone.
+On average every star in the Milky Way has at least one planet: hundreds of billions in all.
 
-### Mass plus radius reveals composition
+### Mass and radius give density
 
-Measuring a planet's shadow alone cannot tell a rocky world from a mini gas cloud; combining transit size with Doppler mass unlocks its true interior density.
+A shadow alone cannot tell rock from gas. Size and mass together can.
 
 ### No single gas proves life
 
-Volcanoes and sunlight can fake oxygen or methane alone; astronomers look for **chemical disequilibrium** (`O₂ + CH₄ + H₂O` together) as the fingerprint of a living biosphere.
+Look for gases that should not be together, such as oxygen with methane.
